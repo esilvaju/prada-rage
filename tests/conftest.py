@@ -1,6 +1,6 @@
 import pytest
 import lib
-from lib.infrastructure.config.ioc_config import Container
+from lib.infrastructure.config.containers import Container
 
 
 container = Container()
