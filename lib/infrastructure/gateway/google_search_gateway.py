@@ -2,7 +2,7 @@ from googlesearch import search
 from lib.core.ports.secondary.search_engine_output_port import SearchEngineOutputPort
 
 
-class GoogleSearchEngine(SearchEngineOutputPort):
+class GoogleSearchGateway(SearchEngineOutputPort):
     def __init__(self):
         pass
 
