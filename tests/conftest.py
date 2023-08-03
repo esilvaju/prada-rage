@@ -1,12 +1,11 @@
-from dependency_injector.wiring import inject, Provide
 import pytest
-
+import lib
 from lib.infrastructure.config.ioc_config import Container
 
 
+container = Container()
+container.wire(modules=[lib])
+
 @pytest.fixture(scope="session")
-def container() -> Container:
-    appContainer = Container()
-    appContainer.wire(modules=[
-        "lib.infrastructure.gateway.env_gateway"
-    ])
+def app_container() -> Container:
+    return container
