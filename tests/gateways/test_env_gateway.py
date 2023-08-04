@@ -1,5 +1,5 @@
 
-from lib.infrastructure.config.ioc_config import Container
+from lib.infrastructure.config.containers import Container
 
 
 def test_env_gateway(app_container: Container):

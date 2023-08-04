@@ -1,4 +1,4 @@
-from lib.infrastructure.config.ioc_config import Container
+from lib.infrastructure.config.containers import Container
 
 
 def test_scrape_docs(app_container: Container):
