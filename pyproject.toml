@@ -14,6 +14,15 @@ pyyaml = "^6.0.1"
 googlesearch-python = "^1.2.3"
 beautifulsoup4 = "^4.12.2"
 requests = "^2.31.0"
+langchain = "^0.0.259"
+chromadb = "^0.4.5"
+llama-cpp-python = "^0.1.77"
+pdfminer-six = "^20221105"
+instructorembedding = "^1.0.1"
+sentence-transformers = "^2.2.2"
+huggingface-hub = "^0.16.4"
+transformers = "^4.31.0"
+faiss-cpu = "^1.7.4"
 
 
 [tool.poetry.group.dev.dependencies]
