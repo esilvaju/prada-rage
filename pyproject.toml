@@ -23,6 +23,7 @@ sentence-transformers = "^2.2.2"
 huggingface-hub = "^0.16.4"
 transformers = "^4.31.0"
 faiss-cpu = "^1.7.4"
+torch = ">=2.0.0, !=2.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
