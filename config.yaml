@@ -1,25 +1,18 @@
 log:
-  level: "INFO"
+  level: "DEBUG"
   format: "[%(asctime)s] [%(levelname)s] [%(name)s]: %(message)s"
 
 files:
-  root_directory: "~/.rage"
-  source_docs_directory: "source_docs"
+  root_directory: "${PRADA_RAGE_ROOT_DIRECTORY:~/.rage}"
+  source_docs_directory: "${PRADA_RAGE_SOURCE_DOCS_DIR}:source_docs"
 
 db:
-  persist_dir: "db"
-  chrome_db_impl: "duckdb+parquet"
-  anonymized_telemetry: false
+  persist_dir: "${PRADA_RAGE_DB_DIR}:db"
+  chroma_db_impl: "${PRADA_RAGE_CHROMA_DB_IMPL}:duckdb+parquet"
+  anonymized_telemetry: ${PRADA_RAGE_ANONYMIZED_TELEMETRY:false}
 
-parallelism:
-  use_max_cpu_threads: true
-  default_threads: 8
-  max_processes: 8
-
-
-embeddings_service:
-  embedding_model_name: "hkunlp/instructor-large"
-  device_type: "cpu"
-  chunk_size: 1000
-  chunk_overlap: 200
-  
+embedding_service:
+  embedding_model_name: ${PRADA_RAGE_EMBEDDING_MODEL_NAME:hkunlp/instructor-large}
+  device_type: ${PRADA_RAGE_EMBEDDING_DEVICE_TYPE:cpu}
+  chunk_size: ${PRADA_RAGE_EMBEDDING_CHUNK_SIZE:1000}
+  chunk_overlap: ${PRADA_RAGE_EMBEDDING_CHUNK_OVERLAP:200}

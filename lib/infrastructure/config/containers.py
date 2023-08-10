@@ -6,7 +6,6 @@ from chromadb.config import Settings
 
 from lib.core.entity.devices import DeviceType
 
-from lib.core.ports.secondary.website_scraper_output_port import WebsiteScraperOutputPort
 from lib.core.service.localgpt_embedding_service import LocalGPTEmbeddingService
 
 from lib.infrastructure.gateway.google_search_gateway import GoogleSearchGateway
@@ -14,7 +13,7 @@ from lib.infrastructure.gateway.website_scraper_gateway import WebsiteScraperGat
 
 class Container(containers.DeclarativeContainer):
 
-    config = providers.Configuration(yaml_files=["config.yml"])
+    config = providers.Configuration(yaml_files=["./config.yaml"])
 
     logging = providers.Resource(
         logging.basicConfig,
@@ -33,22 +32,17 @@ class Container(containers.DeclarativeContainer):
     )
 
     # Domain Services:
-    device_type: DeviceType = DeviceType(config.embedding_service.device_type.toUpper())
     
-    chrome_settings = Settings(
-        chroma_db_impl=config.db.chrome_db_impl,
-        persist_directory=config.db.persist_dir,
-    )
-
     localgpt_embedding_service = providers.Factory(
         LocalGPTEmbeddingService,
-        device_type=config.embedding_service.device_type,
+        device_type=config.embedding_service.device_type._as(DeviceType),
         embedding_model_name=config.embedding_service.embedding_model_name,
-        docs_dir = Path(config.files.root_directory) / Path(config.files.source_docs_directory),
-        chunk_size=config.embedding_service.chunk_size,
-        chunk_overlap=config.embedding_service.chunk_overlap,
-        db_directory=Path(config.files.root_directory) / Path(config.db.persist_dir),
-        chroma_settings=chrome_settings
+        root_dir=config.files.root_directory.as_(Path),
+        docs_dir = config.files.root_directory.as_(Path),
+        db_directory = config.db.persist_dir.as_(Path),
+        chunk_size=config.embedding_service.chunk_size.as_int(),
+        chunk_overlap=config.embedding_service.chunk_overlap.as_int(),
+        chroma_db_impl=config.db.chroma_db_impl,
     )
 
     

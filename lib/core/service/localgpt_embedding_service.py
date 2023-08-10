@@ -10,7 +10,19 @@ from lib.core.entity.devices import DeviceType
 from lib.core.service.embedding_service import EmbeddingService
 
 class LocalGPTEmbeddingService(EmbeddingService):
-    def __init__(self, device_type: DeviceType, embedding_model_name: str, docs_dir: Path, chunk_size: int, chunk_overlap: int , db_directory: str, chroma_settings: Settings):
+    def __init__(self, device_type: DeviceType, 
+                 embedding_model_name: str, 
+                 root_dir: str, 
+                 docs_dir: Path, 
+                 chunk_size: int, 
+                 chunk_overlap: int , 
+                 db_directory: str, 
+                 chroma_db_impl: str):
+        docs_dir = root_dir / docs_dir
+        chroma_settings = chromadb.config.Settings(
+            chrome_db_impl=chroma_db_impl,
+            persist_directory=root_dir / db_directory,
+        )
         super().__init__(device_type, embedding_model_name, docs_dir, chunk_size, chunk_overlap, db_directory, chroma_settings)
         
     
