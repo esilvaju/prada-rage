@@ -12,7 +12,7 @@ import logging
 from lib.core.entity.devices import DeviceType
 
 class EmbeddingService(ABC):
-    def __init__(self, device_type: DeviceType, docs_dir: Path, embedding_model_name: str, chunk_size: int, chunk_overlap: int, chroma_client: Client) -> None:
+    def __init__(self, device_type: DeviceType, docs_dir: Path, db_dir: Path, embedding_model_name: str, chunk_size: int, chunk_overlap: int) -> None:
         self.logger = logging.getLogger(self.__class__.__name__)
         self._document_map = {
             ".txt": TextLoader,
@@ -26,11 +26,11 @@ class EmbeddingService(ABC):
             ".doc": Docx2txtLoader,
         }
         self._docs_dir = docs_dir
+        self._db_dir = db_dir
         self._chunk_size = chunk_size
         self._chunk_overlap = chunk_overlap
         self._device_type = device_type
         self._embedding_model_name = embedding_model_name
-        self._chroma_client = chroma_client
 
     @property
     def document_map(self):
@@ -39,6 +39,10 @@ class EmbeddingService(ABC):
     @property
     def docs_dir(self):
         return self._docs_dir
+    
+    @property
+    def db_dir(self):
+        return str(self._db_dir)
     
     @property
     def model_name(self):
@@ -50,19 +54,15 @@ class EmbeddingService(ABC):
      
     @property
     def device_type(self):
-        return self._device_type | DeviceType.CPU
-   
-    @property
-    def chroma_client(self):
-        return self._chroma_client    
+        return self._device_type
 
     @property
     def chunk_size(self):
-        return self._chunk_size | 1000
+        return self._chunk_size
     
     @property
     def chunk_overlap(self):
-        return self._chunk_overlap | 200
+        return self._chunk_overlap
     
     @abstractmethod
     def create_embeddings(self, src_dir: Path):

@@ -1,5 +1,5 @@
 from pathlib import Path
-import chromadb
+from langchain.vectorstores import Chroma
 from langchain.docstore.document import Document
 from typing import List
 from chromadb import Client, PersistentClient
@@ -20,26 +20,23 @@ class LocalGPTEmbeddingService(EmbeddingService):
                  db_directory: str, 
                  ):
         docs_dir = root_dir / docs_dir
-    
-        chroma_client: Client = PersistentClient(
-            path=str(root_dir / db_directory),
-            settings=Settings(
-                anonymized_telemetry=False
-            ))
+        db_dir = root_dir / db_directory
         
         super().__init__(
-            device_type=device_type, 
+            device_type=DeviceType(device_type), 
             embedding_model_name=embedding_model_name, 
-            docs_dir=docs_dir, 
+            docs_dir=docs_dir,
+            db_dir=db_dir,
             chunk_size=chunk_size, 
             chunk_overlap=chunk_overlap, 
-            chroma_client=chroma_client)
+        )
         
     
-    def create_embeddings(self) -> dict[str, List[Document]]:
+    def create_embeddings(self, documents: list[Document]) -> dict[str, List[Document]]:
         # Loads all documents from the source documents directory
-        self.logger.info(f"Loading documents from {self.docs_dir}")
-        documents = self.load_documents(self.docs_dir)
+        if(len(documents) == 0):
+            self.logger.info(f"Loading documents from {self.docs_dir}")
+            documents = self.load_documents(self.docs_dir)
         
         # Groups documents by file extension
         document_groups = self.group_documents_by_extension(documents)
@@ -52,9 +49,9 @@ class LocalGPTEmbeddingService(EmbeddingService):
 
         # Create embeddings for each document
         self.logger.info("Creating embeddings")
-        embeddings = HuggingFaceInstructEmbeddings(
+        embedding_fn = HuggingFaceInstructEmbeddings(
             model_name=self.model_name,
-            model_kwargs={"device": self.device_type},
+            model_kwargs={"device": self.device_type.value},
         )
 
         # change the embedding type here if you are running into issues.
@@ -64,8 +61,5 @@ class LocalGPTEmbeddingService(EmbeddingService):
 
         # embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
         
-        collection = self.chroma_client.get_or_create_collection("documents")
-        collection.add(
-            embeddings=embeddings,
-            documents=data,
-        )
+        db = Chroma.from_documents(data, embedding_fn, persist_directory=self.db_dir)
+        return db
