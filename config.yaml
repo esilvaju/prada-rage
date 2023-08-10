@@ -4,11 +4,11 @@ log:
 
 files:
   root_directory: "${PRADA_RAGE_ROOT_DIRECTORY:~/.rage}"
-  source_docs_directory: "${PRADA_RAGE_SOURCE_DOCS_DIR}:source_docs"
+  source_docs_directory: "${PRADA_RAGE_SOURCE_DOCS_DIR:source_docs}"
 
 db:
-  persist_dir: "${PRADA_RAGE_DB_DIR}:db"
-  chroma_db_impl: "${PRADA_RAGE_CHROMA_DB_IMPL}:duckdb+parquet"
+  persist_dir: "${PRADA_RAGE_DB_DIR:db}"
+  chroma_db_impl: "${PRADA_RAGE_CHROMA_DB_IMPL:duckdb+parquet}"
   anonymized_telemetry: ${PRADA_RAGE_ANONYMIZED_TELEMETRY:false}
 
 embedding_service:

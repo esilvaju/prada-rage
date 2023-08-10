@@ -25,7 +25,7 @@ class EmbeddingService(ABC):
             ".docx": Docx2txtLoader,
             ".doc": Docx2txtLoader,
         }
-        self.docs_dir = docs_dir
+        self._docs_dir = docs_dir
         self._chunk_size = chunk_size
         self._chunk_overlap = chunk_overlap
         self._device_type = device_type

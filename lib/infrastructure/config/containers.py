@@ -35,10 +35,10 @@ class Container(containers.DeclarativeContainer):
     
     localgpt_embedding_service = providers.Factory(
         LocalGPTEmbeddingService,
-        device_type=config.embedding_service.device_type._as(DeviceType),
+        device_type=config.embedding_service.device_type,
         embedding_model_name=config.embedding_service.embedding_model_name,
         root_dir=config.files.root_directory.as_(Path),
-        docs_dir = config.files.root_directory.as_(Path),
+        docs_dir = config.files.source_docs_directory.as_(Path),
         db_directory = config.db.persist_dir.as_(Path),
         chunk_size=config.embedding_service.chunk_size.as_int(),
         chunk_overlap=config.embedding_service.chunk_overlap.as_int(),
