@@ -8,7 +8,6 @@ files:
 
 db:
   persist_dir: "${PRADA_RAGE_DB_DIR:db}"
-  chroma_db_impl: "${PRADA_RAGE_CHROMA_DB_IMPL:duckdb+parquet}"
   anonymized_telemetry: ${PRADA_RAGE_ANONYMIZED_TELEMETRY:false}
 
 embedding_service:

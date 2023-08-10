@@ -6,13 +6,13 @@ from typing import List
 # https://python.langchain.com/en/latest/modules/indexes/document_loaders/examples/excel.html?highlight=xlsx#microsoft-excel
 from langchain.document_loaders import CSVLoader, PDFMinerLoader, TextLoader, UnstructuredExcelLoader, Docx2txtLoader
 from langchain.docstore.document import Document
-from chromadb.config import Settings
+from chromadb import Client
 import logging
 
 from lib.core.entity.devices import DeviceType
 
 class EmbeddingService(ABC):
-    def __init__(self, device_type: DeviceType, docs_dir: Path, embedding_model_name: str, chunk_size: int, chunk_overlap: int , db_directory: str = "db", chroma_settings: Settings = None) -> None:
+    def __init__(self, device_type: DeviceType, docs_dir: Path, embedding_model_name: str, chunk_size: int, chunk_overlap: int, chroma_client: Client) -> None:
         self.logger = logging.getLogger(self.__class__.__name__)
         self._document_map = {
             ".txt": TextLoader,
@@ -30,6 +30,7 @@ class EmbeddingService(ABC):
         self._chunk_overlap = chunk_overlap
         self._device_type = device_type
         self._embedding_model_name = embedding_model_name
+        self._chroma_client = chroma_client
 
     @property
     def document_map(self):
@@ -50,14 +51,11 @@ class EmbeddingService(ABC):
     @property
     def device_type(self):
         return self._device_type | DeviceType.CPU
-    
+   
     @property
-    def db_directory(self):
-        return self._db_directory
-    
-    @property
-    def chroma_settings(self) -> Settings:
-        return self._chroma_settings
+    def chroma_client(self):
+        return self._chroma_client    
+
     @property
     def chunk_size(self):
         return self._chunk_size | 1000
@@ -70,13 +68,13 @@ class EmbeddingService(ABC):
     def create_embeddings(self, src_dir: Path):
         raise NotImplementedError
     
-    def load_single_document(self, path: Path) -> Document:
-        file_extension = path.suffix
+    def load_single_document(self, path: str) -> Document:
+        file_extension = f".{path.split('.')[-1]}"
         loader_class = self.document_map.get(file_extension)
         if loader_class:
             loader = loader_class(path)
         else:
-            raise ValueError(f"Document type {file_extension} for file {path.name} is undefined")
+            raise ValueError(f"Document type {file_extension} for file {path} is undefined")
         dataset =  loader.load()
         return dataset[0]
     

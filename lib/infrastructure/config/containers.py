@@ -42,7 +42,6 @@ class Container(containers.DeclarativeContainer):
         db_directory = config.db.persist_dir.as_(Path),
         chunk_size=config.embedding_service.chunk_size.as_int(),
         chunk_overlap=config.embedding_service.chunk_overlap.as_int(),
-        chroma_db_impl=config.db.chroma_db_impl,
     )
 
     

@@ -33,10 +33,9 @@ pytest-env = "^0.8.2"
 
 [tool.pytest.ini_options]
 env = [
-    "PRADA_RAGE_ROOT_DIRECTORY=./",
+    "PRADA_RAGE_ROOT_DIRECTORY=./tests/mocks",
     "PRADA_RAGE_SOURCE_DOCS_DIR=source_docs",
     "PRADA_RAGE_DB_DIR=db",
-    "PRADA_RAGE_CHROMA_DB_IMPL=duckdb+parquet",
     "PRADA_RAGE_ANONYMIZED_TELEMETRY=false",
     "PRADA_RAGE_EMBEDDING_MODEL_NAME=hkunlp/instructor-large",
     "PRADA_RAGE_EMBEDDING_DEVICE_TYPE=cpu",

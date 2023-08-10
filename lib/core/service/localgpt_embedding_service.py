@@ -2,6 +2,7 @@ from pathlib import Path
 import chromadb
 from langchain.docstore.document import Document
 from typing import List
+from chromadb import Client, PersistentClient
 from chromadb.config import Settings
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -17,18 +18,28 @@ class LocalGPTEmbeddingService(EmbeddingService):
                  chunk_size: int, 
                  chunk_overlap: int , 
                  db_directory: str, 
-                 chroma_db_impl: str):
+                 ):
         docs_dir = root_dir / docs_dir
-        chroma_settings: Settings = Settings(
-            persist_directory=str(root_dir / db_directory),
-        )
-        super().__init__(device_type, embedding_model_name, docs_dir, chunk_size, chunk_overlap, db_directory, chroma_settings)
+    
+        chroma_client: Client = PersistentClient(
+            path=str(root_dir / db_directory),
+            settings=Settings(
+                anonymized_telemetry=False
+            ))
+        
+        super().__init__(
+            device_type=device_type, 
+            embedding_model_name=embedding_model_name, 
+            docs_dir=docs_dir, 
+            chunk_size=chunk_size, 
+            chunk_overlap=chunk_overlap, 
+            chroma_client=chroma_client)
         
     
-    def create_embeddings(self, src_dir: Path) -> dict[str, List[Document]]:
+    def create_embeddings(self) -> dict[str, List[Document]]:
         # Loads all documents from the source documents directory
-        self.logger.info(f"Loading documents from {src_dir}")
-        documents = self.load_documents(src_dir)
+        self.logger.info(f"Loading documents from {self.docs_dir}")
+        documents = self.load_documents(self.docs_dir)
         
         # Groups documents by file extension
         document_groups = self.group_documents_by_extension(documents)
@@ -52,12 +63,9 @@ class LocalGPTEmbeddingService(EmbeddingService):
         # inference service.
 
         # embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
-
-        db = chromadb.from_documents(
-            data,
-            embeddings,
-            persist_directory=self.db_directory,
-            client_settings=self.chroma_settings,
+        
+        collection = self.chroma_client.get_or_create_collection("documents")
+        collection.add(
+            embeddings=embeddings,
+            documents=data,
         )
-        db.persist()
-        db = None
