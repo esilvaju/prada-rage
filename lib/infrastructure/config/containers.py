@@ -33,7 +33,6 @@ class Container(containers.DeclarativeContainer):
     )
 
     # Domain Services:
-    
     localgpt_embedding_gateway = providers.Factory(
         LocalGPTEmbeddingService,
         device_type=config.embedding_service.device_type,
@@ -48,6 +47,7 @@ class Container(containers.DeclarativeContainer):
     localgpt_inference_gateway = providers.Factory(
         LocalGPTInferenceQueryService,
         llm_model = config.localgpt.llm_model,
+        root_dir=config.files.root_directory.as_(Path),
         db_dir = config.db.persist_dir.as_(Path),
         embedding_model_name=config.embedding_service.embedding_model_name,
         device_type=config.embedding_service.device_type,

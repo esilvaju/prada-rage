@@ -3,7 +3,7 @@ from pathlib import Path
 import torch
 from auto_gptq import AutoGPTQForCausalLM
 from huggingface_hub import hf_hub_download
-from langchain.chains import RetrievalQA
+from langchain.chains import RetrievalQAWithSourcesChain, RetrievalQA
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.llms import HuggingFacePipeline, LlamaCpp
 from langchain.memory import ConversationBufferMemory
@@ -24,11 +24,12 @@ from lib.infrastructure.config.devices import DeviceType
 from lib.infrastructure.gateway.localgpt.llm_models import supported_models
 
 class LocalGPTInferenceQueryService:
-    def __init__(self, llm_model: str, db_dir: Path, embedding_model_name: str, device_type: DeviceType) -> None:
+    def __init__(self, llm_model: str, root_dir: Path, db_dir: Path, embedding_model_name: str, device_type: DeviceType) -> None:
         self.logger = logging.getLogger(self.__class__.__name__)
+        self._root_dir = root_dir
         self._db_dir = db_dir
         self._embedding_model_name = embedding_model_name
-        self._device_type = device_type
+        self._device_type = DeviceType(device_type)
         self._llm_model = llm_model
         self._supported_models = supported_models
 
@@ -138,7 +139,7 @@ class LocalGPTInferenceQueryService:
     
     @property
     def db_dir(self):
-        return str(self._db_dir)
+        return str(self._root_dir / self._db_dir)
     
     @property
     def model_name(self):
@@ -148,7 +149,7 @@ class LocalGPTInferenceQueryService:
     def embedding_fn(self):
         return HuggingFaceInstructEmbeddings(
             model_name=self.model_name,
-            model_kwargs={"device": self.device_type.value},
+            model_kwargs={"device": self.device_type},
         )
     
     @property
@@ -164,7 +165,7 @@ class LocalGPTInferenceQueryService:
     
     @property
     def device_type(self):
-        return self._device_type
+        return self._device_type.value
     
     @property
     def llm_model(self):
@@ -197,7 +198,7 @@ just say that you don't know, don't try to make up an answer.
 Question: {question}
 Helpful Answer:
 """
-        return PromptTemplate(input_variables=["history", "context", "question"])
+        return PromptTemplate(input_variables=["history", "context", "question"], template=template)
     
     @property
     def memory(self):
