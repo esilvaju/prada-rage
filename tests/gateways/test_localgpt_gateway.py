@@ -9,8 +9,7 @@ def test_localgpt_embedding_service(app_container: Container):
     assert constitution_pdf.exists()
     assert constitution_pdf.is_file()
     document = localgpt_embedding_service.load_single_document(path=str(constitution_pdf))
-    chroma_collection = localgpt_embedding_service.create_embeddings(documents=[document])
-    # print(embeddings)
+    localgpt_embedding_service.create_embeddings(documents=[document])
 
     localgpt_inference_service = app_container.localgpt_inference_gateway()
     assert localgpt_inference_service is not None

@@ -9,7 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v2
 
@@ -25,4 +27,17 @@ jobs:
         poetry install
 
     - name: Run pytest
-      run: poetry run pytest -s
+      run: |
+        echo "OLD_HF_CACHE_HASH=$(find ~/.cache/huggingface ~/.cache/torch -type f -exec sha256sum {} + | LC_ALL=C sort | sha256sum | cut -d ' ' -f 1)" >> $GITHUB_ENV
+        poetry run pytest -s
+        echo "NEW_HF_CACHE_HASH=$(find ~/.cache/huggingface ~/.cache/torch -type f -exec sha256sum {} + | LC_ALL=C sort | sha256sum | cut -d ' ' -f 1)" >> $GITHUB_ENV
+
+    - name: Save new HF models to cache
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          ~/.cache/huggingface
+          ~/.cache/torch
+        key: hf-models-${{ matrix.os }}-${{ env.NEW_HF_CACHE_HASH }}
+      # Only save cache if the hash has changed
+      if: ${{ env.NEW_HF_CACHE_HASH}} != ${{ env.OLD_HF_CACHE_HASH }}
