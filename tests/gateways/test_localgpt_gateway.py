@@ -3,7 +3,7 @@ from lib.infrastructure.config.containers import Container
 
 
 def test_localgpt_embedding_service(app_container: Container):
-    localgpt_embedding_service = app_container.localgpt_embedding_service()
+    localgpt_embedding_service = app_container.localgpt_embedding_gateway()
     assert localgpt_embedding_service is not None
     constitution_pdf = Path("tests/mocks/source_docs/constitution.pdf")
     assert constitution_pdf.exists()

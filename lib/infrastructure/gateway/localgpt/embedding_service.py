@@ -9,7 +9,7 @@ from langchain.docstore.document import Document
 from chromadb import Client
 import logging
 
-from lib.core.entity.devices import DeviceType
+from lib.infrastructure.config.devices import DeviceType
 
 class EmbeddingService(ABC):
     def __init__(self, device_type: DeviceType, docs_dir: Path, db_dir: Path, embedding_model_name: str, chunk_size: int, chunk_overlap: int) -> None:

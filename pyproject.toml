@@ -24,6 +24,7 @@ huggingface-hub = "^0.16.4"
 transformers = "^4.31.0"
 faiss-cpu = "^1.7.4"
 torch = ">=2.0.0, !=2.0.1"
+auto-gptq = "0.2.2"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -42,6 +43,7 @@ env = [
     "PRADA_RAGE_EMBEDDING_DEVICE_TYPE=cpu",
     "PRADA_RAGE_EMBEDDING_CHUNK_SIZE=1000",
     "PRADA_RAGE_EMBEDDING_CHUNK_OVERLAP=200",
+    "PRADA_RAGE_LOCALGPT_LLM_MODEL=llama2-7b-chat",
 ]
 
 [build-system]

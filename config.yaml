@@ -15,3 +15,6 @@ embedding_service:
   device_type: ${PRADA_RAGE_EMBEDDING_DEVICE_TYPE:cpu}
   chunk_size: ${PRADA_RAGE_EMBEDDING_CHUNK_SIZE:1000}
   chunk_overlap: ${PRADA_RAGE_EMBEDDING_CHUNK_OVERLAP:200}
+
+localgpt:
+  llm_model: ${PRADA_RAGE_LOCALGPT_LLM_MODEL:llama2-7b-chat}

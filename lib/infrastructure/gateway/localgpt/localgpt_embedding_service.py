@@ -7,8 +7,8 @@ from chromadb.config import Settings
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceInstructEmbeddings
-from lib.core.entity.devices import DeviceType
-from lib.core.service.embedding_service import EmbeddingService
+from lib.infrastructure.config.devices import DeviceType
+from lib.infrastructure.gateway.localgpt.embedding_service import EmbeddingService
 
 class LocalGPTEmbeddingService(EmbeddingService):
     def __init__(self, device_type: str, 
