@@ -18,3 +18,10 @@ embedding_service:
 
 localgpt:
   llm_model: ${PRADA_RAGE_LOCALGPT_LLM_MODEL:llama2-7b-chat}
+
+elastic:
+  host: ${PRADA_RAGE_ELASTIC_HOST:localhost}
+  port: ${PRADA_RAGE_ELASTIC_PORT:9200}
+  index: ${PRADA_RAGE_ELASTIC_INDEX:rage}
+  username: ${PRADA_RAGE_ELASTIC_USERNAME:elastic}
+  password: ${PRADA_RAGE_ELASTIC_PASSWORD:changeme}
