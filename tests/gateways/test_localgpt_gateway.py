@@ -16,7 +16,7 @@ def test_localgpt_embedding_service(app_container: Container):
 
     qa = localgpt_inference_service.qa
 
-    query = "What is the supreme law of the land?"
+    query = "How long the president will stay in office?"
 
     res = qa(query)
     answer, documents = res["result"], res["source_documents"]
