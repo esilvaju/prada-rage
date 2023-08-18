@@ -22,7 +22,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        apt install python-dev libpq-dev # psycopg2
+        sudo apt-get update
+        sudo apt-get install python3-dev libpq-dev # psycopg2
         python -m pip install --upgrade pip
         pip install poetry
         poetry install
