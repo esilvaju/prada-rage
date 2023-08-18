@@ -54,7 +54,7 @@ class Database:
     
     @property
     def url(self) -> str:
-        return self.__engine.url
+        return self.__engine_url
     
     @property
     def base(self) -> Base:
