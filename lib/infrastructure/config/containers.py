@@ -11,7 +11,7 @@ from lib.infrastructure.gateway.localgpt.localgpt_embedding_service import Local
 from lib.infrastructure.gateway.localgpt.localgpt_inference_service import LocalGPTInferenceQueryService
 from lib.infrastructure.gateway.website_scraper_gateway import WebsiteScraperGateway
 from lib.infrastructure.gateway.localgpt.localgpt_inference_service import supported_models
-from lib.infrastructure.repository.database import Database
+from lib.infrastructure.repository.sqla.database import Database
 
 class Container(containers.DeclarativeContainer):
 
