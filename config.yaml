@@ -6,9 +6,15 @@ files:
   root_directory: "${PRADA_RAGE_ROOT_DIRECTORY:~/.rage}"
   source_docs_directory: "${PRADA_RAGE_SOURCE_DOCS_DIR:source_docs}"
 
-db:
-  persist_dir: "${PRADA_RAGE_DB_DIR:db}"
-  anonymized_telemetry: ${PRADA_RAGE_ANONYMIZED_TELEMETRY:false}
+rdbms:
+  host: ${PRADA_RAGE_RDBMS_HOST:localhost}
+  port: ${PRADA_RAGE_RDBMS_PORT:5432}
+  database: ${PRADA_RAGE_RDBMS_DBNAME:rage}
+  username: ${PRADA_RAGE_RDBMS_USERNAME:postgres}
+  password: ${PRADA_RAGE_RDBMS_PASSWORD:postgres}
+
+vectorstore:
+  persist_dir: "${PRADA_RAGE_VECTORSTORE_DIR:db}"
 
 embedding_service:
   embedding_model_name: ${PRADA_RAGE_EMBEDDING_MODEL_NAME:hkunlp/instructor-large}
@@ -18,10 +24,3 @@ embedding_service:
 
 localgpt:
   llm_model: ${PRADA_RAGE_LOCALGPT_LLM_MODEL:llama2-7b-chat}
-
-elastic:
-  host: ${PRADA_RAGE_ELASTIC_HOST:localhost}
-  port: ${PRADA_RAGE_ELASTIC_PORT:9200}
-  index: ${PRADA_RAGE_ELASTIC_INDEX:rage}
-  username: ${PRADA_RAGE_ELASTIC_USERNAME:elastic}
-  password: ${PRADA_RAGE_ELASTIC_PASSWORD:changeme}

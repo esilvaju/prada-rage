@@ -11,6 +11,7 @@ from lib.infrastructure.gateway.localgpt.localgpt_embedding_service import Local
 from lib.infrastructure.gateway.localgpt.localgpt_inference_service import LocalGPTInferenceQueryService
 from lib.infrastructure.gateway.website_scraper_gateway import WebsiteScraperGateway
 from lib.infrastructure.gateway.localgpt.localgpt_inference_service import supported_models
+from lib.infrastructure.repository.database import Database
 
 class Container(containers.DeclarativeContainer):
 
@@ -21,6 +22,15 @@ class Container(containers.DeclarativeContainer):
         stream=sys.stdout,
         level=config.log.level,
         format=config.log.format,
+    )
+
+    db = providers.Singleton(
+        Database,
+        db_host=config.rdbms.host,
+        db_port=config.rdbms.port.as_int(),
+        db_user=config.rdbms.username,
+        db_password=config.rdbms.password,
+        db_name=config.rdbms.database,
     )
 
     # Gateways:
@@ -39,7 +49,7 @@ class Container(containers.DeclarativeContainer):
         embedding_model_name=config.embedding_service.embedding_model_name,
         root_dir=config.files.root_directory.as_(Path),
         docs_dir = config.files.source_docs_directory.as_(Path),
-        db_directory = config.db.persist_dir.as_(Path),
+        db_directory = config.vectorstore.persist_dir.as_(Path),
         chunk_size=config.embedding_service.chunk_size.as_int(),
         chunk_overlap=config.embedding_service.chunk_overlap.as_int(),
     )
@@ -48,7 +58,7 @@ class Container(containers.DeclarativeContainer):
         LocalGPTInferenceQueryService,
         llm_model = config.localgpt.llm_model,
         root_dir=config.files.root_directory.as_(Path),
-        db_dir = config.db.persist_dir.as_(Path),
+        db_dir = config.vectorstore.persist_dir.as_(Path),
         embedding_model_name=config.embedding_service.embedding_model_name,
         device_type=config.embedding_service.device_type,
     )

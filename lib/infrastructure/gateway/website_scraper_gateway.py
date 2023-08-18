@@ -23,5 +23,5 @@ class WebsiteScraperGateway(WebsiteScraperOutputPort):
         # break multi-headlines into a line each
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
         # drop blank lines
-        text = '\n'.join(chunk for chunk in chunks if chunk)
+        # text = '\n'.join(chunk for chunk in chunks if chunk)
         return text
