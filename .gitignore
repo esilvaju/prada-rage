@@ -1,5 +1,5 @@
 db/
-source_docs/
+./source_docs/*
 tests/mocks/db/*
 
 # Byte-compiled / optimized / DLL files
