@@ -8,6 +8,7 @@ Prada RAge is a research agent that can be used to learn contexts from provided 
 cd tests
 docker compose up -d
 cd ../
+alembic upgrade head
 alembic revision --autogenerate -m "migration message"
 cd tests
 docker compose down

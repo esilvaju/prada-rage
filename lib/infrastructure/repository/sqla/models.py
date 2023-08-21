@@ -22,7 +22,7 @@ class VectorStore(Base):
 
     vector_store_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
     name = Column(String)
-    lfn = Column(String)  # Logical File Name
+    lfn = Column(String, unique=True)  # Logical File Name
     protocol = Column(SAEnum(ProtocolEnum), nullable=False)
     research_context_id = Column(String, ForeignKey('research_contexts.id'))
 
@@ -31,7 +31,7 @@ class Document(Base):
     
     document_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
     name = Column(String)
-    lfn = Column(String)  # Logical File Name
+    lfn = Column(String, unique=True)  # Logical File Name
     protocol = Column(SAEnum(ProtocolEnum), nullable=False)
     
 class Message(Base):
@@ -68,7 +68,7 @@ class ResearchContext(Base):
     id = Column(String, primary_key=True, default=uuid.uuid4().hex)
     title = Column(String)
     vector_store = Column(String)
-    research_id = Column(String, ForeignKey('research_goals.id'))
+    research_id = Column(String, ForeignKey('research_goals.id'), nullable=False)
     source_documents = relationship('Document', backref='research_context')
     conversations = relationship('Conversation', backref='research_context')
     notes = relationship('Note', backref='research_context')
