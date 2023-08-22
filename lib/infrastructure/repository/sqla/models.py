@@ -117,13 +117,13 @@ class SoftModelBase(ModelBase):
 class SQLAUser(Base, ModelBase):
     __tablename__ = 'user'
 
-    prada_user_uuid: Mapped[str] = mapped_column("prada_user_uuid", String, primary_key=True, default=uuid.uuid4().hex)
+    prada_user_uuid: Mapped[str] = mapped_column("prada_user_uuid", String, primary_key=True)
     notes: Mapped[List['SQLAUserNote']] = relationship('SQLAUserNote', backref='user')
 
     def __repr__(self):
         return f"<User(prada_user_uuid={self.prada_user_uuid})>"
 
-class NoteModelBase():
+class NoteModelBase:
     """ Base class for Notes """
     __table_initialized__ = False
 
@@ -135,10 +135,10 @@ class NoteModelBase():
     def content(cls):
         return mapped_column("content", Text, nullable=False)
     
-class SQLANote(Base, NoteModelBase):
+class SQLANote(Base, NoteModelBase, SoftModelBase):
     __tablename__ = 'note'
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, default=uuid.uuid4().hex)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
     type: Mapped[NoteType] = mapped_column(SAEnum(NoteType), nullable=False)
     
     __mapper_args__ = {
@@ -148,7 +148,7 @@ class SQLANote(Base, NoteModelBase):
 
 class SQLAUserNote(SQLANote):
     __tablename__ = 'user_note'
-    id: Mapped[str] = mapped_column(String, ForeignKey('note.id'), primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, ForeignKey('note.id'), primary_key=True)
     user_id: Mapped[str] = mapped_column(ForeignKey("user.prada_user_uuid"), nullable=False)
     
     __mapper_args__ = {
