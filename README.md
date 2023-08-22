@@ -2,6 +2,9 @@
 Prada RAge is a research agent that can be used to learn contexts from provided source documents and answer questions specific to that context.
 
 ## Developer Tips
+### Database Models
+![Database Models](docs/database-models.png)
+
 ### Autogenerate Alembic Migrations
 
 ```bash

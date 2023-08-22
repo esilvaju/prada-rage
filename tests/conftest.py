@@ -4,6 +4,8 @@ import lib
 from lib.infrastructure.config.containers import Container
 from alembic.config import Config
 from alembic import command
+from sqlalchemy.orm import Session
+
 
 container = Container()
 print(container.config())
@@ -56,3 +58,8 @@ def with_rdbms_migrations(request, with_rdbms) -> None:
     except Exception as e:
         pytest.fail("Failed to run migrations, error: {e}")
     request.addfinalizer(lambda: command.downgrade(alembic_cfg, "base"))
+
+@pytest.fixture(scope="function")
+def db_session(with_rdbms_migrations) -> Session:
+    """ Create a new database session for each test """
+    yield container.db().session
