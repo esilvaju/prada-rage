@@ -28,6 +28,35 @@ class NoteType(Enum):
     CONVERSATION = 'conversation_note'
     USER = 'user_note'
 
+class BaseRageModel(BaseModel):
+    created_at: datetime
+    updated_at: datetime
+
+class BaseSoftDeleteRageModel(BaseRageModel):
+    deleted: bool
+    deleted_at: datetime
+
+class BaseNote(BaseSoftDeleteRageModel):
+    id: int
+    title: str
+    content: str
+
+class User(BaseRageModel):
+    """
+    Represents a user in the system
+    """
+    prada_user_uuid: str
+    notes: List["UserNote"]
+
+    def __str__(self) -> str:
+        return "User: " + super().__str__() + f", prada_user_uuid: {self.prada_user_uuid}"
+
+class UserNote(BaseNote):
+    """ 
+    Represents a note left by the user
+    """
+    user: User
+
 
 # class Document(BaseModel):
 #     """
