@@ -1,0 +1,37 @@
+name: Code-Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'poetry'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install python3-dev libpq-dev # psycopg2
+        python -m pip install --upgrade pip
+        pip install poetry
+        poetry install
+
+    - name: Run mypy
+      run: mypy .
+
+    - name: Run Black
+      if: always()
+      run: black --check .
