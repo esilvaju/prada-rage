@@ -260,35 +260,26 @@ class SQLAResearchContext(Base, SoftModelBase):
     )
     documents: Mapped[List['SQLADocument']] = relationship('SQLADocument', secondary=Document_ResearchContext_Association)
     vector_store: Mapped['SQLAVectorStore'] = relationship('SQLAVectorStore', back_populates='research_context', uselist=False)
-
-# class SQLADocumentNote(Base):
-#     __tablename__ = 'document_notes'
-
-#     note_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
-#     title = Column(String)
-#     content = Column(String)
-#     timestamp = Column(DateTime)
-#     document_id = Column(String, ForeignKey('documents.document_id'))
+    conversations: Mapped[List['SQLAConversation']] = relationship('SQLAConversation', backref='research_context')
 
 
-# class SQLAMessage(Base):
-#     __tablename__ = 'messages'
+class SQLAConversation(Base, SoftModelBase):
+    __tablename__ = 'conversation'
 
-#     message_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
-#     conversation_id = Column(String, ForeignKey('conversations.conversation_id'))
-#     timestamp = Column(DateTime)
-#     sender = Column(String)
-#     text = Column(String)
-#     source_documents = relationship('SQLADocument', backref='message')
-#     source_documents_metadata = Column(String)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String, nullable=True)
+    research_context_id = mapped_column(ForeignKey('research_context.id'), nullable=False)
+    messages: Mapped[List['SQLAMessage']] = relationship('SQLAMessage', backref='conversation')
 
-# class SQLAConversation(Base):
-#     __tablename__ = 'conversations'
 
-#     conversation_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
-#     participants = Column(SAEnum(ConversationSender), nullable=False)  # You might want to use a separate table for participants
-#     messages = relationship('SQLAMessage', backref='conversation')
-#     research_context = Column(String, ForeignKey('research_contexts.id'))
+class SQLAMessage(Base, SoftModelBase):
+    __tablename__ = 'messages'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    content: Mapped[str] = mapped_column(String, nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    sender: Mapped[ConversationSender] = mapped_column(SAEnum(ConversationSender), nullable=False)
+    conversation_id: Mapped[int] = mapped_column(ForeignKey('conversation.id'), nullable=False)
 
 # class SQLAConversationNote(Base):
 #     __tablename__ = 'conversation_notes'
