@@ -1,4 +1,5 @@
 import os
+from faker import Faker
 import pytest
 import lib
 from lib.infrastructure.config.containers import Container
@@ -63,3 +64,7 @@ def with_rdbms_migrations(request, with_rdbms) -> None:
 def db_session(with_rdbms_migrations) -> Session:
     """ Create a new database session for each test """
     yield container.db().session
+
+@pytest.fixture(scope="function")
+def fake():
+    return Faker()

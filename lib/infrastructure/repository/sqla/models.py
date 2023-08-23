@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import List
-import uuid
 
 from sqlalchemy import (
     CheckConstraint,
@@ -156,15 +155,6 @@ class SQLAUser(Base, ModelBase):
     def __repr__(self):
         return f"<User(prada_user_uuid={self.prada_user_uuid})>"
 
-    def save(self, flush=True, session=None):
-        # check if research topic documents exist in knowledge base
-        for research_topic in self.research_topics:
-            for document in research_topic.documents:
-                if document not in self.knowledge_base:
-                    raise ValueError(
-                        f"Document {document} not in knowledge base of user {self}"
-                    )
-        super().save(flush=flush, session=session)
 
 class NoteModelBase:
     """Base class for Notes"""
@@ -206,7 +196,7 @@ class SQLAUserNote(SQLANote):
 ResearchTopicKnowledgeBaseAssociation = Table(
     'research_topic_knowledge_base_association',
     Base.metadata,
-    Column('research_topic_id', Integer, ForeignKey('research_topics.id')),
+    Column('research_topic_id', Integer, ForeignKey('research_topic.id')),
     Column('document_id', Integer, ForeignKey('knowledge_base.id'))
 )
 
@@ -222,13 +212,12 @@ class SQLADocument(Base, SoftModelBase):
     user_id: Mapped[str] = mapped_column(
         ForeignKey("user.prada_user_uuid"), nullable=False
     )
-
     def __repr__(self):
         return f"<Document (id={self.id}, name={self.name})>"
     
 
 class SQLAResearchTopic(Base, SoftModelBase):
-    __tablename__ = 'research_topics'
+    __tablename__ = 'research_topic'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String, nullable=False)
@@ -238,31 +227,39 @@ class SQLAResearchTopic(Base, SoftModelBase):
     user_id: Mapped[str] = mapped_column(
         ForeignKey("user.prada_user_uuid"), nullable=False
     )
-
-    def save(self, flush=True, session=None):
-        # check if research topic documents exist in knowledge base
-        for document in self.documents:
-            if document.user != self.user:
-                raise ValueError(
-                    f"Failed to add document to research topic {self}. Document {document} not in knowledge base of user {self.user}"
-                )
-        super().save(flush=flush, session=session)
+    research_contexts: Mapped[List['SQLAResearchContext']] = relationship('SQLAResearchContext', backref='research_topic')
 
     def __repr__(self):
         return f"<ResearchTopic (id={self.id}, title={self.title})>"
 
-# class SQLADocument(Base):
-#     __tablename__ = 'documents'
+Document_ResearchContext_Association = Table(
+    'document_research_context_association',
+    Base.metadata,
+    Column('document_id', Integer, ForeignKey('knowledge_base.id')),
+    Column('research_context_id', Integer, ForeignKey('research_context.id'))
+)
 
-#     document_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
-#     user = Column(String, ForeignKey('users.prada_user_uuid'))
-#     messages = relationship('SQLAMessage', backref='source_document')
-#     notes = relationship('SQLADocumentNote', backref='document')
+class SQLAVectorStore(Base, ModelBase):
+    __tablename__ = 'vector_store'
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    lfn: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    protocol: Mapped[ProtocolEnum] = mapped_column(
+        SAEnum(ProtocolEnum), nullable=False
+    )
+    research_context_id: Mapped[int] = mapped_column(ForeignKey("research_context.id"), nullable=False)
+    research_context: Mapped['SQLAResearchContext'] = relationship('SQLAResearchContext',back_populates='vector_store')
 
-#     name = Column(String)
-#     lfn = Column(String, unique=True)  # Logical File Name
-#     protocol = Column(SAEnum(ProtocolEnum), nullable=False)
+class SQLAResearchContext(Base, SoftModelBase):
+    __tablename__ = 'research_context'
 
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    research_topic_id: Mapped[int] = mapped_column(
+        ForeignKey("research_topic.id"), nullable=False
+    )
+    documents: Mapped[List['SQLADocument']] = relationship('SQLADocument', secondary=Document_ResearchContext_Association)
+    vector_store: Mapped['SQLAVectorStore'] = relationship('SQLAVectorStore', back_populates='research_context', uselist=False)
 
 # class SQLADocumentNote(Base):
 #     __tablename__ = 'document_notes'
