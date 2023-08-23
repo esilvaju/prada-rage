@@ -4,6 +4,7 @@ import pytest
 from lib.infrastructure.config.containers import Container
 from tests.markers import RUNNING_IN_CI
 
+
 @pytest.mark.skipif(RUNNING_IN_CI, reason="Skipping test in CI")
 def test_localgpt_embedding_service(app_container: Container):
     localgpt_embedding_service = app_container.localgpt_embedding_gateway()

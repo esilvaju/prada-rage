@@ -18,6 +18,7 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from lib.infrastructure.repository.sqla.database import Base
+
 target_metadata = Base.metadata
 
 # load models into memory
@@ -27,7 +28,6 @@ from lib.infrastructure.repository.sqla.models import *
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
 
 
 def run_migrations_offline() -> None:
@@ -61,16 +61,14 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    
+
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section), # type: ignore[arg-type]
+        config.get_section(config.config_ini_section),  # type: ignore[arg-type]
         prefix="sqlalchemy.",
-    ) 
-    
+    )
+
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

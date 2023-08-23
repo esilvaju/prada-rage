@@ -1,4 +1,10 @@
-from lib.infrastructure.repository.sqla.models import SQLADocument, SQLAResearchContext, SQLAResearchTopic, SQLAUser, SQLAVectorStore
+from lib.infrastructure.repository.sqla.models import (
+    SQLADocument,
+    SQLAResearchContext,
+    SQLAResearchTopic,
+    SQLAUser,
+    SQLAVectorStore,
+)
 
 
 def test_research_topic_can_access_research_contexts(db_session, fake):
@@ -27,7 +33,7 @@ def test_research_topic_can_access_research_contexts(db_session, fake):
     with db_session() as session:
         user.save(session=session, flush=True)
         session.commit()
-    
+
     with db_session() as session:
         user = session.query(SQLAUser).filter_by(prada_user_uuid=username).first()
         assert len(user.research_topics) == 1
@@ -41,5 +47,3 @@ def test_research_topic_can_access_research_contexts(db_session, fake):
         research_context = session.query(SQLAResearchContext).filter_by(title=research_context_title).first()
         assert research_context.research_topic.title == research_topic_title
         assert research_context.research_topic.user.prada_user_uuid == username
-
-

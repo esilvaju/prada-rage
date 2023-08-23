@@ -1,5 +1,11 @@
 from lib.core.entity.models import ConversationSender
-from lib.infrastructure.repository.sqla.models import SQLAConversation, SQLAMessage, SQLAResearchContext, SQLAResearchTopic, SQLAUser
+from lib.infrastructure.repository.sqla.models import (
+    SQLAConversation,
+    SQLAMessage,
+    SQLAResearchContext,
+    SQLAResearchTopic,
+    SQLAUser,
+)
 
 
 def test_add_conversation_to_research_context(db_session, fake):
@@ -36,7 +42,7 @@ def test_add_conversation_to_research_context(db_session, fake):
         prada_user_uuid=fake.name(),
         research_topics=[researchTopic],
     )
-    
+
     with db_session() as session:
         researchTopic.save(session=session, flush=True)
         session.commit()
@@ -49,4 +55,3 @@ def test_add_conversation_to_research_context(db_session, fake):
         assert messages[0].sender == ConversationSender.USER
         assert messages[1].content == "Who's there?"
         assert messages[1].sender == ConversationSender.AGENT
-
