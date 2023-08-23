@@ -4,72 +4,128 @@ from typing import List
 from datetime import datetime
 from uuid import uuid4
 
+
 class ProtocolEnum(Enum):
     """
     Enum for the different protocols that can be used to store a document.
     """
-    S3 = 's3'
-    NAS = 'nas'
-    LOCAL = 'local'
+
+    S3 = "s3"
+    NAS = "nas"
+    LOCAL = "local"
+
 
 class ConversationSender(Enum):
     """
     Enum for the different participants in a conversation.
     """
-    USER = 'user'
-    AGENT = 'agent'
+
+    USER = "user"
+    AGENT = "agent"
 
 
 class NoteType(Enum):
     """
     Enum for the different types of notes.
     """
-    DOCUMENT = 'document_note'
-    CONVERSATION = 'conversation_note'
-    USER = 'user_note'
+
+    DOCUMENT = "document_note"
+    CONVERSATION = "conversation_note"
+    USER = "user_note"
+
 
 class BaseRageModel(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    def __str__(self) -> str:
+        return f"created_at: {self.created_at}, updated_at: {self.updated_at}"
+
+
 class BaseSoftDeleteRageModel(BaseRageModel):
     deleted: bool
     deleted_at: datetime
+
+    def __str__(self) -> str:
+        return (
+            super().__str__()
+            + f", deleted: {self.deleted}, deleted_at: {self.deleted_at}"
+        )
+
 
 class BaseNote(BaseSoftDeleteRageModel):
     id: int
     title: str
     content: str
 
+    def __str__(self) -> str:
+        return (
+            "Note: "
+            + super().__str__()
+            + f", id: {self.id}, title: {self.title}, content: {self.content}"
+        )
+
+
 class User(BaseRageModel):
     """
     Represents a user in the system
     """
+
     prada_user_uuid: str
     notes: List["UserNote"]
+    research_topics: List["ResearchTopic"]
+    knowledge_base: List["Document"]
 
     def __str__(self) -> str:
-        return "User: " + super().__str__() + f", prada_user_uuid: {self.prada_user_uuid}"
+        return (
+            "User: " + super().__str__() + f", prada_user_uuid: {self.prada_user_uuid}"
+        )
+
 
 class UserNote(BaseNote):
-    """ 
+    """
     Represents a note left by the user
     """
+
     user: User
 
+    def __str__(self) -> str:
+        return f"UserNote: user: {self.user}, {super().__str__()}"
 
-# class Document(BaseModel):
-#     """
-#     Represents a document or a file containing the information for the Knowledge Base
-#     """
-#     id: int = Field(default_factory=lambda: uuid4().hex)
-#     name: str
-#     type: str
-#     lfn: str
-#     protocol: ProtocolEnum
 
-#     def __str__(self) -> str:
-#         return "Document: " + super().__str__() + f", id: {self.id}, name: {self.name}, lfn: {self.lfn}, protocol: {self.protocol}"
+class ResearchTopic(BaseSoftDeleteRageModel):
+    """
+    A research goal is a collection of research contexts and knowledge base documents
+    """
+
+    id: int
+    title: str
+    description: str
+    prada_tagger_node_id: str
+    user: User
+    # contexts: List["ResearchContext"]
+    documents: List["Document"]
+
+
+class Document(BaseModel):
+    """
+    Represents a document or a file containing the information for the Knowledge Base
+    """
+
+    id: int
+    name: str
+    type: str
+    lfn: str
+    protocol: ProtocolEnum
+    user: User
+
+    def __str__(self) -> str:
+        return (
+            "Document: "
+            + super().__str__()
+            + f", id: {self.id}, name: {self.name}, lfn: {self.lfn}, protocol: {self.protocol}"
+        )
+
 
 # class Message(BaseModel):
 #     """

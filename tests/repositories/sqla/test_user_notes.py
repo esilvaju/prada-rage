@@ -55,3 +55,28 @@ def test_delete_notes(db_session):
         assert user.notes[0].title == "Test Note 2"
         assert user.notes[0].content == "This is a test note 2"
         assert user.notes[0].type == NoteType.USER
+
+def test_user_is_present_in_notes(db_session):
+    maany = SQLAUser(
+        prada_user_uuid="maany",
+        notes=[
+            SQLAUserNote(
+                title="Test Note",
+                content="This is a test note",
+                type = NoteType.USER
+            ),
+            SQLAUserNote(
+                title="Test Note 2",
+                content="This is a test note 2",
+                type = NoteType.USER
+            )
+        ]
+    )
+
+    with db_session() as session:
+        session.add(maany)
+        session.commit()
+
+    with db_session() as session:
+        note = session.query(SQLAUserNote).filter_by(title="Test Note").first()
+        assert note.user.prada_user_uuid == "maany"

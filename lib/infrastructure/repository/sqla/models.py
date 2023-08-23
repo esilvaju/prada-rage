@@ -2,7 +2,17 @@ from datetime import datetime
 from typing import List
 import uuid
 
-from sqlalchemy import CheckConstraint, Column, Integer, String, DateTime, Boolean, ForeignKey, Text
+from sqlalchemy import (
+    CheckConstraint,
+    Column,
+    Integer,
+    String,
+    DateTime,
+    Boolean,
+    ForeignKey,
+    Table,
+    Text,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.ext.declarative import declared_attr
@@ -11,8 +21,10 @@ from sqlalchemy.orm import mapped_column, object_mapper, relationship, Mapped
 from lib.infrastructure.repository.sqla.database import Base
 from lib.core.entity.models import ConversationSender, NoteType, ProtocolEnum
 
+
 class ModelBase(object):
     """Base class for Rage Models"""
+
     __table_initialized__ = False
 
     @declared_attr
@@ -21,9 +33,15 @@ class ModelBase(object):
         # pylint: disable=maybe-no-member
         # otherwise, proceed normally
         # pylint: disable=maybe-no-member
-        return (CheckConstraint('CREATED_AT IS NOT NULL', name=cls.__tablename__.upper() + '_CREATED_NN'),
-                                  CheckConstraint('UPDATED_AT IS NOT NULL', name=cls.__tablename__.upper() + '_UPDATED_NN'),
-                                  {'mysql_engine': 'InnoDB'})
+        return (
+            CheckConstraint(
+                "CREATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_CREATED_NN"
+            ),
+            CheckConstraint(
+                "UPDATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_UPDATED_NN"
+            ),
+            {"mysql_engine": "InnoDB"},
+        )
 
     @declared_attr
     def created_at(cls):  # pylint: disable=no-self-argument
@@ -31,7 +49,9 @@ class ModelBase(object):
 
     @declared_attr
     def updated_at(cls):  # pylint: disable=no-self-argument
-        return mapped_column("updated_at", DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+        return mapped_column(
+            "updated_at", DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        )
 
     def save(self, flush=True, session=None):
         """Save this object"""
@@ -81,7 +101,7 @@ class ModelBase(object):
 
     def to_dict(self):
         dictionary = self.__dict__.copy()
-        dictionary.pop('_sa_instance_state')
+        dictionary.pop("_sa_instance_state")
         return dictionary
 
     next = __next__
@@ -89,15 +109,24 @@ class ModelBase(object):
 
 class SoftModelBase(ModelBase):
     """Base class for Rage Models with soft-deletion support"""
+
     __table_initialized__ = False
 
     @declared_attr
     def __table_args__(cls):  # pylint: disable=no-self-argument
         # pylint: disable=maybe-no-member
-        return (CheckConstraint('CREATED_AT IS NOT NULL', name=cls.__tablename__.upper() + '_CREATED_NN'),
-                                  CheckConstraint('UPDATED_AT IS NOT NULL', name=cls.__tablename__.upper() + '_UPDATED_NN'),
-                                  CheckConstraint('DELETED IS NOT NULL', name=cls.__tablename__.upper() + '_DELETED_NN'),
-                                  {'mysql_engine': 'InnoDB'})
+        return (
+            CheckConstraint(
+                "CREATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_CREATED_NN"
+            ),
+            CheckConstraint(
+                "UPDATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_UPDATED_NN"
+            ),
+            CheckConstraint(
+                "DELETED IS NOT NULL", name=cls.__tablename__.upper() + "_DELETED_NN"
+            ),
+            {"mysql_engine": "InnoDB"},
+        )
 
     @declared_attr
     def deleted(cls):  # pylint: disable=no-self-argument
@@ -115,66 +144,116 @@ class SoftModelBase(ModelBase):
 
 
 class SQLAUser(Base, ModelBase):
-    __tablename__ = 'user'
+    __tablename__ = "user"
 
-    prada_user_uuid: Mapped[str] = mapped_column("prada_user_uuid", String, primary_key=True)
-    notes: Mapped[List['SQLAUserNote']] = relationship('SQLAUserNote', backref='user')
+    prada_user_uuid: Mapped[str] = mapped_column(
+        "prada_user_uuid", String, primary_key=True
+    )
+    notes: Mapped[List["SQLAUserNote"]] = relationship("SQLAUserNote", backref="user")
+    research_topics: Mapped[List["SQLAResearchTopic"]] = relationship("SQLAResearchTopic", backref="user")
+    knowledge_base: Mapped[List["SQLADocument"]] = relationship("SQLADocument", backref="user")
 
     def __repr__(self):
         return f"<User(prada_user_uuid={self.prada_user_uuid})>"
 
+    def save(self, flush=True, session=None):
+        # check if research topic documents exist in knowledge base
+        for research_topic in self.research_topics:
+            for document in research_topic.documents:
+                if document not in self.knowledge_base:
+                    raise ValueError(
+                        f"Document {document} not in knowledge base of user {self}"
+                    )
+        super().save(flush=flush, session=session)
+
 class NoteModelBase:
-    """ Base class for Notes """
+    """Base class for Notes"""
+
     __table_initialized__ = False
 
     @declared_attr
     def title(cls):
         return mapped_column("title", String, nullable=False)
-    
+
     @declared_attr
     def content(cls):
         return mapped_column("content", Text, nullable=False)
-    
+
+
 class SQLANote(Base, NoteModelBase, SoftModelBase):
-    __tablename__ = 'note'
+    __tablename__ = "note"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     type: Mapped[NoteType] = mapped_column(SAEnum(NoteType), nullable=False)
-    
-    __mapper_args__ = {
-        'polymorphic_identity': 'note',
-        'polymorphic_on': 'type'
-    }
+
+    __mapper_args__ = {"polymorphic_identity": "note", "polymorphic_on": "type"}
+
 
 class SQLAUserNote(SQLANote):
-    __tablename__ = 'user_note'
-    id: Mapped[int] = mapped_column(Integer, ForeignKey('note.id'), primary_key=True)
-    user_id: Mapped[str] = mapped_column(ForeignKey("user.prada_user_uuid"), nullable=False)
-    
+    __tablename__ = "user_note"
+    id: Mapped[int] = mapped_column(Integer, ForeignKey("note.id"), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("user.prada_user_uuid"), nullable=False
+    )
+
     __mapper_args__ = {
-        'polymorphic_identity': NoteType.USER,
+        "polymorphic_identity": NoteType.USER,
     }
 
     def __repr__(self):
         return f"<UserNote (id={self.id}, user={self.user_id})>"
 
-# class SQLAResearchTopic(Base):
-#     __tablename__ = 'research_topics'
+ResearchTopicKnowledgeBaseAssociation = Table(
+    'research_topic_knowledge_base_association',
+    Base.metadata,
+    Column('research_topic_id', Integer, ForeignKey('research_topics.id')),
+    Column('document_id', Integer, ForeignKey('knowledge_base.id'))
+)
+
+class SQLADocument(Base, SoftModelBase):
+    __tablename__ = "knowledge_base"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    lfn: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    protocol: Mapped[ProtocolEnum] = mapped_column(
+        SAEnum(ProtocolEnum), nullable=False
+    )
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("user.prada_user_uuid"), nullable=False
+    )
+
+    def __repr__(self):
+        return f"<Document (id={self.id}, name={self.name})>"
     
-#     id = Column(String, primary_key=True, default=uuid.uuid4().hex)
-#     user = Column(String, ForeignKey('users.prada_user_uuid'))
-#     title = Column(String)
-#     prada_tagger_node_id = Column(String)
-#     archived = Column(Boolean)
-#     prada_uuid = Column(String)
-#     contexts = relationship('SQLAResearchContext', backref='research')
-#     documents = relationship('SQLADocument', backref='research')
 
+class SQLAResearchTopic(Base, SoftModelBase):
+    __tablename__ = 'research_topics'
 
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String, nullable=False)
+    description: Mapped[str] = mapped_column(String, nullable=False)
+    prada_tagger_node_id: Mapped[str] = mapped_column(String, nullable=True)
+    documents: Mapped[List['SQLADocument']] = relationship('SQLADocument', secondary=ResearchTopicKnowledgeBaseAssociation)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("user.prada_user_uuid"), nullable=False
+    )
+
+    def save(self, flush=True, session=None):
+        # check if research topic documents exist in knowledge base
+        for document in self.documents:
+            if document.user != self.user:
+                raise ValueError(
+                    f"Failed to add document to research topic {self}. Document {document} not in knowledge base of user {self.user}"
+                )
+        super().save(flush=flush, session=session)
+
+    def __repr__(self):
+        return f"<ResearchTopic (id={self.id}, title={self.title})>"
 
 # class SQLADocument(Base):
 #     __tablename__ = 'documents'
-    
+
 #     document_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
 #     user = Column(String, ForeignKey('users.prada_user_uuid'))
 #     messages = relationship('SQLAMessage', backref='source_document')
@@ -187,7 +266,7 @@ class SQLAUserNote(SQLANote):
 
 # class SQLADocumentNote(Base):
 #     __tablename__ = 'document_notes'
-    
+
 #     note_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
 #     title = Column(String)
 #     content = Column(String)
@@ -197,7 +276,7 @@ class SQLAUserNote(SQLANote):
 
 # class SQLAMessage(Base):
 #     __tablename__ = 'messages'
-    
+
 #     message_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
 #     conversation_id = Column(String, ForeignKey('conversations.conversation_id'))
 #     timestamp = Column(DateTime)
@@ -205,18 +284,18 @@ class SQLAUserNote(SQLANote):
 #     text = Column(String)
 #     source_documents = relationship('SQLADocument', backref='message')
 #     source_documents_metadata = Column(String)
-    
+
 # class SQLAConversation(Base):
 #     __tablename__ = 'conversations'
-    
+
 #     conversation_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
 #     participants = Column(SAEnum(ConversationSender), nullable=False)  # You might want to use a separate table for participants
 #     messages = relationship('SQLAMessage', backref='conversation')
 #     research_context = Column(String, ForeignKey('research_contexts.id'))
-    
+
 # class SQLAConversationNote(Base):
 #     __tablename__ = 'conversation_notes'
-    
+
 #     note_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
 #     title = Column(String)
 #     content = Column(String)
@@ -226,7 +305,7 @@ class SQLAUserNote(SQLANote):
 
 # class SQLAResearchContext(Base):
 #     __tablename__ = 'research_contexts'
-    
+
 #     id = Column(String, primary_key=True, default=uuid.uuid4().hex)
 #     title = Column(String)
 #     vector_store = relationship('SQLAVectorStore', backref='research_context', uselist=False)
