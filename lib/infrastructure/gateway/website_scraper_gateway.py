@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import requests 
+import requests
 
 from lib.core.ports.secondary.website_scraper_output_port import WebsiteScraperOutputPort
 
@@ -10,10 +10,10 @@ class WebsiteScraperGateway(WebsiteScraperOutputPort):
 
     def extract_text_from_html(self, url: str) -> str:
         page = requests.get(url)
-        soup = BeautifulSoup(page.content, 'html.parser')
+        soup = BeautifulSoup(page.content, "html.parser")
         # kill all script and style elements
         for script in soup(["script", "style"]):
-            script.extract()    # rip it out
+            script.extract()  # rip it out
 
         # get text
         text = soup.get_text()

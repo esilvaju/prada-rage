@@ -4,6 +4,7 @@ from lib.core.dto.research_topic_repository_dto import RegisterSourceDocDTO
 
 from lib.core.entity.models import ResearchTopic, Document
 
+
 class ResearchTopicRepository(ABC):
     """
     Abstract base class for research goal repositories.
@@ -40,7 +41,6 @@ class ResearchTopicRepository(ABC):
         @type source_doc: Document
         """
         pass
-
 
     @abstractmethod
     def archive_research_topic(self, research_topic: ResearchTopic):

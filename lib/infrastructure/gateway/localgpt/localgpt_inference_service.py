@@ -23,8 +23,11 @@ from transformers import (
 from lib.infrastructure.config.devices import DeviceType
 from lib.infrastructure.gateway.localgpt.llm_models import supported_models
 
+
 class LocalGPTInferenceQueryService:
-    def __init__(self, llm_model: str, root_dir: Path, db_dir: Path, embedding_model_name: str, device_type: DeviceType) -> None:
+    def __init__(
+        self, llm_model: str, root_dir: Path, db_dir: Path, embedding_model_name: str, device_type: DeviceType
+    ) -> None:
         self.logger = logging.getLogger(self.__class__.__name__)
         self._root_dir = root_dir
         self._db_dir = db_dir
@@ -136,47 +139,40 @@ class LocalGPTInferenceQueryService:
         self.logger.info("Local LLM Loaded")
 
         return local_llm
-    
+
     @property
     def db_dir(self):
         return str(self._root_dir / self._db_dir)
-    
+
     @property
     def model_name(self):
         return self._embedding_model_name
-    
+
     @property
     def embedding_fn(self):
         return HuggingFaceInstructEmbeddings(
             model_name=self.model_name,
             model_kwargs={"device": self.device_type},
         )
-    
+
     @property
     def db(self):
-        return Chroma(
-            persist_directory=self.db_dir,
-            embedding_function=self.embedding_fn
-        )
-    
-    @property
-    def model_name(self):
-        return self._embedding_model_name
-    
+        return Chroma(persist_directory=self.db_dir, embedding_function=self.embedding_fn)
+
     @property
     def device_type(self):
         return self._device_type.value
-    
+
     @property
     def llm_model(self):
         if self._llm_model not in list(self._supported_models.keys()):
             raise ValueError(f"LLM model {self._llm_model} is not supported")
         return (
             self._llm_model,
-            self._supported_models[self._llm_model]['model_id'],
-            self._supported_models[self._llm_model]['model_basename']
+            self._supported_models[self._llm_model]["model_id"],
+            self._supported_models[self._llm_model]["model_basename"],
         )
-    
+
     @property
     def llm(self):
         llm_model, model_id, model_basename = self.llm_model
@@ -186,7 +182,7 @@ class LocalGPTInferenceQueryService:
     @property
     def retriever(self):
         return self.db.as_retriever()
-    
+
     @property
     def prompt_template(self):
         template = """Use the following pieces of context to answer the question at the end. If you don't know the answer,\
@@ -199,14 +195,11 @@ Question: {question}
 Helpful Answer:
 """
         return PromptTemplate(input_variables=["history", "context", "question"], template=template)
-    
+
     @property
     def memory(self):
-        return ConversationBufferMemory(
-            input_key="question",
-            memory_key="history"
-        )
-    
+        return ConversationBufferMemory(input_key="question", memory_key="history")
+
     @property
     def qa(self):
         return RetrievalQA.from_chain_type(

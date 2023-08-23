@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
 
-#from stream import PassThrough, Transform
+# from stream import PassThrough, Transform
 
 from .dto import BaseDTO
-from .usecase_models import TRequestModel,  TAuthenticatedRequestModel, TResponseModel, TErrorModel
-#from .postprocessing_pipeline_elements import BaseStreamingPostProcessingPipelineElement
+from .usecase_models import TRequestModel, TAuthenticatedRequestModel, TResponseModel, TErrorModel
+
+# from .postprocessing_pipeline_elements import BaseStreamingPostProcessingPipelineElement
 from .web import TWebResponse
 from .view_models import BaseViewModel
 
@@ -25,6 +26,7 @@ class BaseAuthenticatedInputPort(BaseInputPort):
     A base interface for authenticated input ports.
     @typeparam AuthenticatedRequestModel The type of the authenticated request model for the input port.
     """
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -33,18 +35,14 @@ class BaseAuthenticatedInputPort(BaseInputPort):
         raise NotImplementedError
 
 
-
 class BaseOutputPort(ABC):
     """
     A base interface for output ports.
     @typeparam TResponseModel The type of the response model for the output port.
     @typeparam TErrorModel The type of the error model for the output port.
     """
-    def __init__(
-            self,
-            response: TWebResponse
-            ) -> None:
 
+    def __init__(self, response: TWebResponse) -> None:
         super().__init__()
         self.response = response
 

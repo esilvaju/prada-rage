@@ -48,10 +48,7 @@ class BaseSoftDeleteRageModel(BaseRageModel):
     deleted_at: datetime
 
     def __str__(self) -> str:
-        return (
-            super().__str__()
-            + f", deleted: {self.deleted}, deleted_at: {self.deleted_at}"
-        )
+        return super().__str__() + f", deleted: {self.deleted}, deleted_at: {self.deleted_at}"
 
 
 class BaseNote(BaseSoftDeleteRageModel):
@@ -60,11 +57,7 @@ class BaseNote(BaseSoftDeleteRageModel):
     content: str
 
     def __str__(self) -> str:
-        return (
-            "Note: "
-            + super().__str__()
-            + f", id: {self.id}, title: {self.title}, content: {self.content}"
-        )
+        return "Note: " + super().__str__() + f", id: {self.id}, title: {self.title}, content: {self.content}"
 
 
 class User(BaseRageModel):
@@ -78,9 +71,7 @@ class User(BaseRageModel):
     knowledge_base: List["Document"]
 
     def __str__(self) -> str:
-        return (
-            "User: " + super().__str__() + f", prada_user_uuid: {self.prada_user_uuid}"
-        )
+        return "User: " + super().__str__() + f", prada_user_uuid: {self.prada_user_uuid}"
 
 
 class UserNote(BaseNote):

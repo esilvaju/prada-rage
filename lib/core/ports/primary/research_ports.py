@@ -12,7 +12,6 @@ class ResearchInputPort(ABC):
         presenter,
         search_engine_gateway: SearchEngineOutputPort,
         website_scraper_gateway: WebsiteScraperOutputPort,
-
     ):
         self.presenter = presenter
         self.search_engine_gateway = search_engine_gateway

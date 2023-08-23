@@ -9,6 +9,7 @@ class BaseUsecase(BaseInputPort):
     def execute(self, request_model):
         pass
 
+
 class AuthenticatedUsecase(BaseUsecase):
     def __init__(self):
         pass

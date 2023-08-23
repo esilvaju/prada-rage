@@ -12,10 +12,11 @@ from lib.infrastructure.gateway.localgpt.localgpt_inference_service import Local
 from lib.infrastructure.gateway.website_scraper_gateway import WebsiteScraperGateway
 from lib.infrastructure.gateway.localgpt.localgpt_inference_service import supported_models
 from lib.infrastructure.repository.sqla.database import Database
+
 # from lib.infrastructure.repository.sqla.sqla_research_topic_repository import SQLAResearchTopicRepository
 
-class Container(containers.DeclarativeContainer):
 
+class Container(containers.DeclarativeContainer):
     config = providers.Configuration(yaml_files=["./config.yaml"])
 
     logging = providers.Resource(
@@ -39,12 +40,12 @@ class Container(containers.DeclarativeContainer):
     #     SQLAResearchTopicRepository,
     #     session=db.provided.session,
     # )
-    
+
     # Gateways:
     google_search_gateway = providers.Factory(
         GoogleSearchGateway,
     )
-    
+
     website_scraper_gateway = providers.Factory(
         WebsiteScraperGateway,
     )
@@ -55,19 +56,17 @@ class Container(containers.DeclarativeContainer):
         device_type=config.embedding_service.device_type,
         embedding_model_name=config.embedding_service.embedding_model_name,
         root_dir=config.files.root_directory.as_(Path),
-        docs_dir = config.files.source_docs_directory.as_(Path),
-        db_directory = config.vectorstore.persist_dir.as_(Path),
+        docs_dir=config.files.source_docs_directory.as_(Path),
+        db_directory=config.vectorstore.persist_dir.as_(Path),
         chunk_size=config.embedding_service.chunk_size.as_int(),
         chunk_overlap=config.embedding_service.chunk_overlap.as_int(),
     )
 
     localgpt_inference_gateway = providers.Factory(
         LocalGPTInferenceQueryService,
-        llm_model = config.localgpt.llm_model,
+        llm_model=config.localgpt.llm_model,
         root_dir=config.files.root_directory.as_(Path),
-        db_dir = config.vectorstore.persist_dir.as_(Path),
+        db_dir=config.vectorstore.persist_dir.as_(Path),
         embedding_model_name=config.embedding_service.embedding_model_name,
         device_type=config.embedding_service.device_type,
     )
-
-    

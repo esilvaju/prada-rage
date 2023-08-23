@@ -9,20 +9,20 @@ class BaseDTO:
     """
 
     def __init__(
-            self, 
-# A string literal type that indicates the status of the API response. It can be either 'success' or `error'
-            status: Literal['success', 'error'],
-# An optional number that indicates the error code. Usually contains an HTTP status code
-            error_code: Optional[int] = None,
-# An optional string that indicates the error message. Usually contains an error message
-            error_message: Optional[str] = None,
-# An optional string that provides the name of the error that occurred
-            error_name: Optional[str] = None,
-# An optional string that provides the type of the error that occurred. Usually contains the name and src of the error
-            error_type: Optional[Literal['gateway_endpoint_error'] | str] = None
-            ):
+        self,
+        # A string literal type that indicates the status of the API response. It can be either 'success' or `error'
+        status: Literal["success", "error"],
+        # An optional number that indicates the error code. Usually contains an HTTP status code
+        error_code: Optional[int] = None,
+        # An optional string that indicates the error message. Usually contains an error message
+        error_message: Optional[str] = None,
+        # An optional string that provides the name of the error that occurred
+        error_name: Optional[str] = None,
+        # An optional string that provides the type of the error that occurred. Usually contains the name and src of the error
+        error_type: Optional[Literal["gateway_endpoint_error"] | str] = None,
+    ):
         """
-        @property 
+        @property
         """
 
         self.status = status
@@ -33,13 +33,14 @@ class BaseDTO:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            'status': self.status,
-            'errorCode': self.error_code,
-            'errorMessage': self.error_message,
-            'errorName': self.error_name,
-            'errorType': self.error_type
+            "status": self.status,
+            "errorCode": self.error_code,
+            "errorMessage": self.error_message,
+            "errorName": self.error_name,
+            "errorType": self.error_type,
         }
+
 
 class DTOEncoder:
     def encode(self, dto: BaseDTO) -> bytes:
-        return BytesIO(json.dumps(dto.to_dict()).encode('utf-8')).getvalue()
+        return BytesIO(json.dumps(dto.to_dict()).encode("utf-8")).getvalue()

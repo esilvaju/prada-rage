@@ -9,6 +9,7 @@ class WebsiteScraperOutputPort:
     extract_text_from_html(url: str) -> str:
         Extracts text from the given HTML string and returns it as a string.
     """
+
     def extract_text_from_html(self, url: str) -> str:
         """
         Extracts text from the given HTML string and returns it as a string.

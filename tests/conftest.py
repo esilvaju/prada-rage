@@ -1,4 +1,6 @@
+from contextlib import _GeneratorContextManager
 import os
+from typing import Callable
 from faker import Faker
 import pytest
 import lib
@@ -6,6 +8,8 @@ from lib.infrastructure.config.containers import Container
 from alembic.config import Config
 from alembic import command
 from sqlalchemy.orm import Session
+
+from lib.infrastructure.repository.sqla.database import Database
 
 
 container = Container()
@@ -24,7 +28,7 @@ def docker_compose_file(pytestconfig):
 
 # set autouse=True to automatically inject the postgres into all tests
 @pytest.fixture(scope="session")
-def with_rdbms(app_container: Container, docker_services) -> None:
+def with_rdbms(app_container: Container, docker_services) -> Database:
     """ Ensure that a postgres container is running before running tests """
     def is_responsive() -> bool:
         try:
@@ -61,7 +65,7 @@ def with_rdbms_migrations(request, with_rdbms) -> None:
     request.addfinalizer(lambda: command.downgrade(alembic_cfg, "base"))
 
 @pytest.fixture(scope="function")
-def db_session(with_rdbms_migrations) -> Session:
+def db_session(with_rdbms_migrations) -> Callable[[], _GeneratorContextManager[Session]]: # type: ignore[misc]
     """ Create a new database session for each test """
     yield container.db().session
 

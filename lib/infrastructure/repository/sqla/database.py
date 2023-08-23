@@ -1,5 +1,5 @@
 from contextlib import contextmanager, AbstractContextManager
-from typing import Callable
+from typing import Any, Callable, Generator
 
 from sqlalchemy import create_engine, orm, Engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -10,16 +10,13 @@ import logging
 
 Base = declarative_base()
 
+
 class Database:
     def __init__(self, db_host: str, db_port: int, db_user: str, db_password: str, db_name: str) -> None:
         self.__engine_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
         self.__engine = create_engine(self.__engine_url, echo=True)
         self.__session_factory = orm.scoped_session(
-            orm.sessionmaker(
-                autoflush=False,
-                autocommit=False,
-                bind=self.__engine
-            )
+            orm.sessionmaker(autoflush=False, autocommit=False, bind=self.__engine)
         )
         self.logger = logging.getLogger(self.__class__.__name__)
         self.create_db()
@@ -32,7 +29,7 @@ class Database:
             self.logger.info(f"Database {self.__engine.url} already exists")
 
     @contextmanager
-    def session(self) -> Callable[..., AbstractContextManager[Session]]:
+    def session(self) -> Generator[Session, None, None]:
         session: Session = self.__session_factory()
         try:
             yield session
@@ -51,15 +48,15 @@ class Database:
         except Exception as e:
             self.logger.exception(f"Failed to ping database with error: {e}")
             return False
-    
+
     @property
     def url(self) -> str:
         return self.__engine_url
-    
+
     @property
-    def base(self) -> Base:
+    def base(self) -> Any:
         return Base
-    
+
     @property
     def engine(self) -> Engine:
         return self.__engine

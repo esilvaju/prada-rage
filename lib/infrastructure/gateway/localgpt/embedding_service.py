@@ -2,17 +2,27 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 import os
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List
+from langchain.vectorstores import Chroma
+
 # https://python.langchain.com/en/latest/modules/indexes/document_loaders/examples/excel.html?highlight=xlsx#microsoft-excel
 from langchain.document_loaders import CSVLoader, PDFMinerLoader, TextLoader, UnstructuredExcelLoader, Docx2txtLoader
 from langchain.docstore.document import Document
-from chromadb import Client
 import logging
 
 from lib.infrastructure.config.devices import DeviceType
 
+
 class EmbeddingService(ABC):
-    def __init__(self, device_type: DeviceType, docs_dir: Path, db_dir: Path, embedding_model_name: str, chunk_size: int, chunk_overlap: int) -> None:
+    def __init__(
+        self,
+        device_type: DeviceType,
+        docs_dir: Path,
+        db_dir: Path,
+        embedding_model_name: str,
+        chunk_size: int,
+        chunk_overlap: int,
+    ) -> None:
         self.logger = logging.getLogger(self.__class__.__name__)
         self._document_map = {
             ".txt": TextLoader,
@@ -35,23 +45,23 @@ class EmbeddingService(ABC):
     @property
     def document_map(self):
         return self._document_map
-    
+
     @property
     def docs_dir(self):
         return self._docs_dir
-    
+
     @property
     def db_dir(self):
         return str(self._db_dir)
-    
+
     @property
     def model_name(self):
         return self._embedding_model_name
-    
+
     @property
     def ingest_threads(self):
         return os.cpu_count() or 8
-     
+
     @property
     def device_type(self):
         return self._device_type
@@ -59,15 +69,15 @@ class EmbeddingService(ABC):
     @property
     def chunk_size(self):
         return self._chunk_size
-    
+
     @property
     def chunk_overlap(self):
         return self._chunk_overlap
-    
+
     @abstractmethod
-    def create_embeddings(self, src_dir: Path):
+    def create_embeddings(self, documents: list[Document]) -> Chroma:
         raise NotImplementedError
-    
+
     def load_single_document(self, path: str) -> Document:
         file_extension = f".{path.split('.')[-1]}"
         loader_class = self.document_map.get(file_extension)
@@ -75,9 +85,9 @@ class EmbeddingService(ABC):
             loader = loader_class(path)
         else:
             raise ValueError(f"Document type {file_extension} for file {path} is undefined")
-        dataset =  loader.load()
+        dataset: List[Document] = loader.load()
         return dataset[0]
-    
+
     def load_document_batch(self, filepaths):
         self.logger.info("Loading document batch")
         # create a thread pool
@@ -88,7 +98,6 @@ class EmbeddingService(ABC):
             data_list = [future.result() for future in futures]
             # return data and file paths
             return (data_list, filepaths)
-
 
     def load_documents(self, source_dir: Path) -> list[Document]:
         # Loads all documents from the source documents directory
@@ -120,10 +129,10 @@ class EmbeddingService(ABC):
                 docs.extend(contents)
 
         return docs
-    
+
     def group_documents_by_extension(self, documents: List[Document]) -> dict[str, List[Document]]:
         # Groups documents by file extension
-        document_groups = {}
+        document_groups: Dict[str, List[Document]] = {}
         for document in documents:
             file_extension = os.path.splitext(document.metadata["source"])[1]
             if file_extension not in document_groups:

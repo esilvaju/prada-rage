@@ -11,24 +11,20 @@ class BaseHTTPError(Exception):
 
 HTTPRequest = Dict[str, Any]
 
+
 def prepareRequestArgs(request: HTTPRequest) -> Dict[str, Any]:
-    url = request['url']
+    url = request["url"]
     if isinstance(url, str):
         url = url.strip()
-        if not url.startswith('http'):
-            url = 'http://' + url
-        url = url.split('?', 1)[0]
-        if request.get('params'):
-            url += '?' + urlencode(request['params'])
+        if not url.startswith("http"):
+            url = "http://" + url
+        url = url.split("?", 1)[0]
+        if request.get("params"):
+            url += "?" + urlencode(request["params"])
     else:
         url = url.geturl()
 
-    headers = request.get('headers') or {}
-    body = request.get('body') or {}
+    headers = request.get("headers") or {}
+    body = request.get("body") or {}
 
-    return {
-        'method': request['method'],
-        'url': url,
-        'headers': headers,
-        'data': body
-    }
+    return {"method": request["method"], "url": url, "headers": headers, "data": body}

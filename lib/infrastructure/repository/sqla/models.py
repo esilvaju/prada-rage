@@ -33,12 +33,8 @@ class ModelBase(object):
         # otherwise, proceed normally
         # pylint: disable=maybe-no-member
         return (
-            CheckConstraint(
-                "CREATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_CREATED_NN"
-            ),
-            CheckConstraint(
-                "UPDATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_UPDATED_NN"
-            ),
+            CheckConstraint("CREATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_CREATED_NN"),
+            CheckConstraint("UPDATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_UPDATED_NN"),
             {"mysql_engine": "InnoDB"},
         )
 
@@ -48,9 +44,7 @@ class ModelBase(object):
 
     @declared_attr
     def updated_at(cls):  # pylint: disable=no-self-argument
-        return mapped_column(
-            "updated_at", DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-        )
+        return mapped_column("updated_at", DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def save(self, flush=True, session=None):
         """Save this object"""
@@ -115,15 +109,9 @@ class SoftModelBase(ModelBase):
     def __table_args__(cls):  # pylint: disable=no-self-argument
         # pylint: disable=maybe-no-member
         return (
-            CheckConstraint(
-                "CREATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_CREATED_NN"
-            ),
-            CheckConstraint(
-                "UPDATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_UPDATED_NN"
-            ),
-            CheckConstraint(
-                "DELETED IS NOT NULL", name=cls.__tablename__.upper() + "_DELETED_NN"
-            ),
+            CheckConstraint("CREATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_CREATED_NN"),
+            CheckConstraint("UPDATED_AT IS NOT NULL", name=cls.__tablename__.upper() + "_UPDATED_NN"),
+            CheckConstraint("DELETED IS NOT NULL", name=cls.__tablename__.upper() + "_DELETED_NN"),
             {"mysql_engine": "InnoDB"},
         )
 
@@ -145,9 +133,7 @@ class SoftModelBase(ModelBase):
 class SQLAUser(Base, ModelBase):
     __tablename__ = "user"
 
-    prada_user_uuid: Mapped[str] = mapped_column(
-        "prada_user_uuid", String, primary_key=True
-    )
+    prada_user_uuid: Mapped[str] = mapped_column("prada_user_uuid", String, primary_key=True)
     notes: Mapped[List["SQLAUserNote"]] = relationship("SQLAUserNote", backref="user")
     research_topics: Mapped[List["SQLAResearchTopic"]] = relationship("SQLAResearchTopic", backref="user")
     knowledge_base: Mapped[List["SQLADocument"]] = relationship("SQLADocument", backref="user")
@@ -179,13 +165,13 @@ class SQLANote(Base, NoteModelBase, SoftModelBase):
     __mapper_args__ = {"polymorphic_identity": "note", "polymorphic_on": "type"}
 
 
-
 ResearchTopicKnowledgeBaseAssociation = Table(
-    'research_topic_knowledge_base_association',
+    "research_topic_knowledge_base_association",
     Base.metadata,
-    Column('research_topic_id', Integer, ForeignKey('research_topic.id')),
-    Column('document_id', Integer, ForeignKey('knowledge_base.id'))
+    Column("research_topic_id", Integer, ForeignKey("research_topic.id")),
+    Column("document_id", Integer, ForeignKey("knowledge_base.id")),
 )
+
 
 class SQLADocument(Base, SoftModelBase):
     __tablename__ = "knowledge_base"
@@ -193,102 +179,106 @@ class SQLADocument(Base, SoftModelBase):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     lfn: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    protocol: Mapped[ProtocolEnum] = mapped_column(
-        SAEnum(ProtocolEnum), nullable=False
-    )
-    user_id: Mapped[str] = mapped_column(
-        ForeignKey("user.prada_user_uuid"), nullable=False
-    )
-    notes: Mapped[List['SQLADocumentNote']] = relationship('SQLADocumentNote', backref='document')
+    protocol: Mapped[ProtocolEnum] = mapped_column(SAEnum(ProtocolEnum), nullable=False)
+    user_id: Mapped[str] = mapped_column(ForeignKey("user.prada_user_uuid"), nullable=False)
+    notes: Mapped[List["SQLADocumentNote"]] = relationship("SQLADocumentNote", backref="document")
 
     def __repr__(self):
         return f"<Document (id={self.id}, name={self.name})>"
-    
+
 
 class SQLAResearchTopic(Base, SoftModelBase):
-    __tablename__ = 'research_topic'
+    __tablename__ = "research_topic"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String, nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
     prada_tagger_node_id: Mapped[str] = mapped_column(String, nullable=True)
-    documents: Mapped[List['SQLADocument']] = relationship('SQLADocument', secondary=ResearchTopicKnowledgeBaseAssociation)
-    user_id: Mapped[str] = mapped_column(
-        ForeignKey("user.prada_user_uuid"), nullable=False
+    documents: Mapped[List["SQLADocument"]] = relationship(
+        "SQLADocument", secondary=ResearchTopicKnowledgeBaseAssociation
     )
-    research_contexts: Mapped[List['SQLAResearchContext']] = relationship('SQLAResearchContext', backref='research_topic')
-    notes: Mapped[List['SQLAResearchTopicNotes']] = relationship('SQLAResearchTopicNotes', backref='research_topic')
+    user_id: Mapped[str] = mapped_column(ForeignKey("user.prada_user_uuid"), nullable=False)
+    research_contexts: Mapped[List["SQLAResearchContext"]] = relationship(
+        "SQLAResearchContext", backref="research_topic"
+    )
+    notes: Mapped[List["SQLAResearchTopicNotes"]] = relationship("SQLAResearchTopicNotes", backref="research_topic")
 
     def __repr__(self):
         return f"<ResearchTopic (id={self.id}, title={self.title})>"
 
+
 Document_ResearchContext_Association = Table(
-    'document_research_context_association',
+    "document_research_context_association",
     Base.metadata,
-    Column('document_id', Integer, ForeignKey('knowledge_base.id')),
-    Column('research_context_id', Integer, ForeignKey('research_context.id'))
+    Column("document_id", Integer, ForeignKey("knowledge_base.id")),
+    Column("research_context_id", Integer, ForeignKey("research_context.id")),
 )
 
+
 class SQLAVectorStore(Base, ModelBase):
-    __tablename__ = 'vector_store'
+    __tablename__ = "vector_store"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     lfn: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    protocol: Mapped[ProtocolEnum] = mapped_column(
-        SAEnum(ProtocolEnum), nullable=False
-    )
+    protocol: Mapped[ProtocolEnum] = mapped_column(SAEnum(ProtocolEnum), nullable=False)
     research_context_id: Mapped[int] = mapped_column(ForeignKey("research_context.id"), nullable=False)
-    research_context: Mapped['SQLAResearchContext'] = relationship('SQLAResearchContext',back_populates='vector_store')
+    research_context: Mapped["SQLAResearchContext"] = relationship("SQLAResearchContext", back_populates="vector_store")
+
 
 class SQLAResearchContext(Base, SoftModelBase):
-    __tablename__ = 'research_context'
+    __tablename__ = "research_context"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String, nullable=False)
-    research_topic_id: Mapped[int] = mapped_column(
-        ForeignKey("research_topic.id"), nullable=False
+    research_topic_id: Mapped[int] = mapped_column(ForeignKey("research_topic.id"), nullable=False)
+    documents: Mapped[List["SQLADocument"]] = relationship(
+        "SQLADocument", secondary=Document_ResearchContext_Association
     )
-    documents: Mapped[List['SQLADocument']] = relationship('SQLADocument', secondary=Document_ResearchContext_Association)
-    vector_store: Mapped['SQLAVectorStore'] = relationship('SQLAVectorStore', back_populates='research_context', uselist=False)
-    conversations: Mapped[List['SQLAConversation']] = relationship('SQLAConversation', backref='research_context')
+    vector_store: Mapped["SQLAVectorStore"] = relationship(
+        "SQLAVectorStore", back_populates="research_context", uselist=False
+    )
+    conversations: Mapped[List["SQLAConversation"]] = relationship("SQLAConversation", backref="research_context")
 
 
 class SQLAConversation(Base, SoftModelBase):
-    __tablename__ = 'conversation'
+    __tablename__ = "conversation"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String, nullable=True)
-    research_context_id = mapped_column(ForeignKey('research_context.id'), nullable=False)
-    messages: Mapped[List['SQLAMessage']] = relationship('SQLAMessage', backref='conversation')
-    notes: Mapped[List['SQLAConversationNote']] = relationship('SQLAConversationNote', backref='conversation')
+    research_context_id = mapped_column(ForeignKey("research_context.id"), nullable=False)
+    messages: Mapped[List["SQLAMessage"]] = relationship("SQLAMessage", backref="conversation")
+    notes: Mapped[List["SQLAConversationNote"]] = relationship("SQLAConversationNote", backref="conversation")
+
 
 KnowledgeBase_Message_Association = Table(
-    'knowledge_base_message_association',
+    "knowledge_base_message_association",
     Base.metadata,
-    Column('knowledge_base_id', Integer, ForeignKey('knowledge_base.id')),
-    Column('message_id', Integer, ForeignKey('messages.id'))
+    Column("knowledge_base_id", Integer, ForeignKey("knowledge_base.id")),
+    Column("message_id", Integer, ForeignKey("messages.id")),
 )
 
+
 class SQLAMessage(Base, SoftModelBase):
-    __tablename__ = 'messages'
+    __tablename__ = "messages"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     content: Mapped[str] = mapped_column(String, nullable=False)
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     sender: Mapped[ConversationSender] = mapped_column(SAEnum(ConversationSender), nullable=False)
-    conversation_id: Mapped[int] = mapped_column(ForeignKey('conversation.id'), nullable=False)
-    source_documents: Mapped[List['SQLADocument']] = relationship('SQLADocument', secondary=KnowledgeBase_Message_Association)
+    conversation_id: Mapped[int] = mapped_column(ForeignKey("conversation.id"), nullable=False)
+    source_documents: Mapped[List["SQLADocument"]] = relationship(
+        "SQLADocument", secondary=KnowledgeBase_Message_Association
+    )
     source_document_metadata: Mapped[str] = mapped_column(String, nullable=True)
+
 
 class SQLAUserNote(SQLANote):
     __tablename__ = "user_note"
     id: Mapped[int] = mapped_column(Integer, ForeignKey("note.id"), primary_key=True)
-    user_id: Mapped[str] = mapped_column(
-        ForeignKey("user.prada_user_uuid"), nullable=False
-    )
+    user_id: Mapped[str] = mapped_column(ForeignKey("user.prada_user_uuid"), nullable=False)
 
     __mapper_args__ = {
-        "polymorphic_identity": NoteType.USER,
+        "polymorphic_identity": NoteType.USER,  # type: ignore[dict-item]
     }
 
     def __repr__(self):
@@ -298,26 +288,24 @@ class SQLAUserNote(SQLANote):
 class SQLAConversationNote(SQLANote):
     __tablename__ = "conversation_note"
     id: Mapped[int] = mapped_column(Integer, ForeignKey("note.id"), primary_key=True)
-    conversation_id: Mapped[int] = mapped_column(
-        ForeignKey("conversation.id"), nullable=False
-    )
+    conversation_id: Mapped[int] = mapped_column(ForeignKey("conversation.id"), nullable=False)
 
     __mapper_args__ = {
-        "polymorphic_identity": NoteType.CONVERSATION,
+        # type: ignore
+        "polymorphic_identity": NoteType.CONVERSATION,  # type: ignore[dict-item]
     }
 
     def __repr__(self):
         return f"<ConversationNote (id={self.id}, conversation={self.conversation_id})>"
-    
+
+
 class SQLADocumentNote(SQLANote):
     __tablename__ = "document_note"
     id: Mapped[int] = mapped_column(Integer, ForeignKey("note.id"), primary_key=True)
-    document_id: Mapped[int] = mapped_column(
-        ForeignKey("knowledge_base.id"), nullable=False
-    )
+    document_id: Mapped[int] = mapped_column(ForeignKey("knowledge_base.id"), nullable=False)
 
     __mapper_args__ = {
-        "polymorphic_identity": NoteType.DOCUMENT,
+        "polymorphic_identity": NoteType.DOCUMENT,  # type: ignore[dict-item]
     }
 
     def __repr__(self):
@@ -327,12 +315,10 @@ class SQLADocumentNote(SQLANote):
 class SQLAResearchTopicNotes(SQLANote):
     __tablename__ = "research_topic_note"
     id: Mapped[int] = mapped_column(Integer, ForeignKey("note.id"), primary_key=True)
-    research_topic_id: Mapped[int] = mapped_column(
-        ForeignKey("research_topic.id"), nullable=False
-    )
+    research_topic_id: Mapped[int] = mapped_column(ForeignKey("research_topic.id"), nullable=False)
 
     __mapper_args__ = {
-        "polymorphic_identity": NoteType.RESEARCH_TOPIC,
+        "polymorphic_identity": NoteType.RESEARCH_TOPIC,  # type: ignore[dict-item]
     }
 
     def __repr__(self):
