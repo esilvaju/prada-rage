@@ -1,4 +1,4 @@
-from lib.sdk.models import BaseResponseModel, BaseAPIError
+from lib.caps.models import BaseResponseModel, BaseAPIError
 
 
 class BasePresenter:
