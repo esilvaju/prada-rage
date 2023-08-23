@@ -5,7 +5,7 @@ Prada RAge is a research agent that can be used to learn contexts from provided 
 
 ## Developer Tips
 ### Database Models
-![Database Models](docs/database-models.png)
+![Database Models](docs/prada-rage-db-models.png)
 
 ### Autogenerate Alembic Migrations
 
