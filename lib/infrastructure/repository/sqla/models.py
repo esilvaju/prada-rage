@@ -262,6 +262,13 @@ class SQLAConversation(Base, SoftModelBase):
     messages: Mapped[List['SQLAMessage']] = relationship('SQLAMessage', backref='conversation')
     notes: Mapped[List['SQLAConversationNote']] = relationship('SQLAConversationNote', backref='conversation')
 
+KnowledgeBase_Message_Association = Table(
+    'knowledge_base_message_association',
+    Base.metadata,
+    Column('knowledge_base_id', Integer, ForeignKey('knowledge_base.id')),
+    Column('message_id', Integer, ForeignKey('messages.id'))
+)
+
 class SQLAMessage(Base, SoftModelBase):
     __tablename__ = 'messages'
 
@@ -270,6 +277,8 @@ class SQLAMessage(Base, SoftModelBase):
     timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     sender: Mapped[ConversationSender] = mapped_column(SAEnum(ConversationSender), nullable=False)
     conversation_id: Mapped[int] = mapped_column(ForeignKey('conversation.id'), nullable=False)
+    source_documents: Mapped[List['SQLADocument']] = relationship('SQLADocument', secondary=KnowledgeBase_Message_Association)
+    source_document_metadata: Mapped[str] = mapped_column(String, nullable=True)
 
 class SQLAUserNote(SQLANote):
     __tablename__ = "user_note"
