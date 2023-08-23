@@ -1,16 +1,16 @@
-from lib.core.dto.research_goal_repository_dto import RegisterSourceDocDTO
+from lib.core.dto.research_topic_repository_dto import RegisterSourceDocDTO
 from lib.core.entity.models import Document, ResearchTopic
 from lib.core.ports.secondary.research_topic_repository import ResearchTopicRepository
 from sqlalchemy.orm import Session
 
 from lib.infrastructure.repository.sqla.models import SQLADocument, SQLAResearchGoal
 
-class SQLAResearchGoalRepository(ResearchTopicRepository):
+class SQLAResearchTopicRepository(ResearchTopicRepository):
     def __init__(self, session: Session):
         super().__init__()
         self.session: Session = session
 
-    def register_source_doc(self, research_goal, source_doc):
+    def register_source_doc(self, research_topic, source_doc):
         if(source_doc is None):
             errorDTO = RegisterSourceDocDTO(
                 status=False, 
@@ -32,7 +32,7 @@ class SQLAResearchGoalRepository(ResearchTopicRepository):
             self.logger.error(f"{errorDTO}")
             return errorDTO
         
-        if(research_goal is None):
+        if(research_topic is None):
             self.logger.error(f"Research goal is None")
             errorDTO = RegisterSourceDocDTO(
                 status=False, 
@@ -43,12 +43,12 @@ class SQLAResearchGoalRepository(ResearchTopicRepository):
             self.logger.error(f"{errorDTO}")
             return errorDTO
 
-        if(research_goal.id is None):
-            self.logger.error(f"Research goal has no id: {research_goal}")
+        if(research_topic.id is None):
+            self.logger.error(f"Research goal has no id: {research_topic}")
             errorDTO = RegisterSourceDocDTO(
                 status=False, 
                 errorCode=-1, 
-                errorMessage=f"Invalid Research goal. {research_goal} has no id", 
+                errorMessage=f"Invalid Research goal. {research_topic} has no id", 
                 errorName="Invalid Research Goal", 
                 errorType="InvalidResearchGoal")
             self.logger.error(f"{errorDTO}")
@@ -68,13 +68,13 @@ class SQLAResearchGoalRepository(ResearchTopicRepository):
             self.logger.error(f"{errorDTO}")
             return errorDTO
         
-        research_goal: SQLAResearchGoal | None = self.session.get(SQLAResearchGoal, research_goal.id)
-        if(research_goal is None):
-            self.logger.error(f"Research goal {research_goal} not found in the database.")
+        research_topic: SQLAResearchGoal | None = self.session.get(SQLAResearchGoal, research_topic.id)
+        if(research_topic is None):
+            self.logger.error(f"Research goal {research_topic} not found in the database.")
             errorDTO = RegisterSourceDocDTO(
                 status=False,
                 errorCode=-1,
-                errorMessage=f"Research goal {research_goal} not found in the database.",
+                errorMessage=f"Research goal {research_topic} not found in the database.",
                 errorName="Research Goal Not Found",
                 errorType="ResearchGoalNotFound"
             )
@@ -82,20 +82,20 @@ class SQLAResearchGoalRepository(ResearchTopicRepository):
             return errorDTO
         
         # add the source document to the research goal
-        existing_sqla_documents = research_goal.documents
+        existing_sqla_documents = research_topic.documents
         if(sqla_document in existing_sqla_documents):
-            self.logger.error(f"Document {sqla_document} already registered for research goal {research_goal}")
+            self.logger.error(f"Document {sqla_document} already registered for research goal {research_topic}")
             errorDTO = RegisterSourceDocDTO(
                 status=False,
                 errorCode=0,
-                errorMessage=f"Document {sqla_document} already registered for research goal {research_goal}",
+                errorMessage=f"Document {sqla_document} already registered for research goal {research_topic}",
                 errorName="Document Already Registered",
                 errorType="DocumentAlreadyRegistered"
             )
             self.logger.error(f"{errorDTO}")
             return errorDTO
         
-        research_goal.documents.extend([sqla_document])
+        research_topic.documents.extend([sqla_document])
 
         # commit the changes
         try:
@@ -112,15 +112,15 @@ class SQLAResearchGoalRepository(ResearchTopicRepository):
             self.logger.error(f"{errorDTO}")
             return errorDTO
         
-        self.logger.info(f"Successfully registered document {sqla_document} for research goal {research_goal}")
+        self.logger.info(f"Successfully registered document {sqla_document} for research goal {research_topic}")
         
         return RegisterSourceDocDTO(
             status=True,
             errorCode=0,
         )
 
-    def unregister_source_doc(self, research_goal: ResearchTopic, source_doc: Document):
+    def unregister_source_doc(self, research_topic: ResearchTopic, source_doc: Document):
         pass
 
-    def archive_research_goal(self, research_goal: ResearchTopic):
+    def archive_research_topic(self, research_topic: ResearchTopic):
         pass

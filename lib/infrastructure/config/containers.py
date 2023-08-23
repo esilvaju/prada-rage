@@ -12,7 +12,7 @@ from lib.infrastructure.gateway.localgpt.localgpt_inference_service import Local
 from lib.infrastructure.gateway.website_scraper_gateway import WebsiteScraperGateway
 from lib.infrastructure.gateway.localgpt.localgpt_inference_service import supported_models
 from lib.infrastructure.repository.sqla.database import Database
-# from lib.infrastructure.repository.sqla.sqla_research_topic_repository import SQLAResearchGoalRepository
+# from lib.infrastructure.repository.sqla.sqla_research_topic_repository import SQLAResearchTopicRepository
 
 class Container(containers.DeclarativeContainer):
 
@@ -35,8 +35,8 @@ class Container(containers.DeclarativeContainer):
     )
 
     # Repositories:
-    # sqla_research_goal_repository = providers.Factory(
-    #     SQLAResearchGoalRepository,
+    # sqla_research_topic_repository = providers.Factory(
+    #     SQLAResearchTopicRepository,
     #     session=db.provided.session,
     # )
     
