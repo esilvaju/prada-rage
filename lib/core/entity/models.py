@@ -32,6 +32,7 @@ class NoteType(Enum):
     DOCUMENT = "document_note"
     CONVERSATION = "conversation_note"
     USER = "user_note"
+    RESEARCH_TOPIC = "research_topic_note"
 
 
 class BaseRageModel(BaseModel):

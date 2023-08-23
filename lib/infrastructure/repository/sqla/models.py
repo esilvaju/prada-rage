@@ -179,19 +179,6 @@ class SQLANote(Base, NoteModelBase, SoftModelBase):
     __mapper_args__ = {"polymorphic_identity": "note", "polymorphic_on": "type"}
 
 
-class SQLAUserNote(SQLANote):
-    __tablename__ = "user_note"
-    id: Mapped[int] = mapped_column(Integer, ForeignKey("note.id"), primary_key=True)
-    user_id: Mapped[str] = mapped_column(
-        ForeignKey("user.prada_user_uuid"), nullable=False
-    )
-
-    __mapper_args__ = {
-        "polymorphic_identity": NoteType.USER,
-    }
-
-    def __repr__(self):
-        return f"<UserNote (id={self.id}, user={self.user_id})>"
 
 ResearchTopicKnowledgeBaseAssociation = Table(
     'research_topic_knowledge_base_association',
@@ -212,6 +199,8 @@ class SQLADocument(Base, SoftModelBase):
     user_id: Mapped[str] = mapped_column(
         ForeignKey("user.prada_user_uuid"), nullable=False
     )
+    notes: Mapped[List['SQLADocumentNote']] = relationship('SQLADocumentNote', backref='document')
+
     def __repr__(self):
         return f"<Document (id={self.id}, name={self.name})>"
     
@@ -228,6 +217,7 @@ class SQLAResearchTopic(Base, SoftModelBase):
         ForeignKey("user.prada_user_uuid"), nullable=False
     )
     research_contexts: Mapped[List['SQLAResearchContext']] = relationship('SQLAResearchContext', backref='research_topic')
+    notes: Mapped[List['SQLAResearchTopicNotes']] = relationship('SQLAResearchTopicNotes', backref='research_topic')
 
     def __repr__(self):
         return f"<ResearchTopic (id={self.id}, title={self.title})>"
@@ -270,7 +260,7 @@ class SQLAConversation(Base, SoftModelBase):
     title: Mapped[str] = mapped_column(String, nullable=True)
     research_context_id = mapped_column(ForeignKey('research_context.id'), nullable=False)
     messages: Mapped[List['SQLAMessage']] = relationship('SQLAMessage', backref='conversation')
-
+    notes: Mapped[List['SQLAConversationNote']] = relationship('SQLAConversationNote', backref='conversation')
 
 class SQLAMessage(Base, SoftModelBase):
     __tablename__ = 'messages'
@@ -281,48 +271,60 @@ class SQLAMessage(Base, SoftModelBase):
     sender: Mapped[ConversationSender] = mapped_column(SAEnum(ConversationSender), nullable=False)
     conversation_id: Mapped[int] = mapped_column(ForeignKey('conversation.id'), nullable=False)
 
-# class SQLAConversationNote(Base):
-#     __tablename__ = 'conversation_notes'
+class SQLAUserNote(SQLANote):
+    __tablename__ = "user_note"
+    id: Mapped[int] = mapped_column(Integer, ForeignKey("note.id"), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("user.prada_user_uuid"), nullable=False
+    )
 
-#     note_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
-#     title = Column(String)
-#     content = Column(String)
-#     timestamp = Column(DateTime)
-#     conversation_id = Column(String, ForeignKey('conversations.conversation_id'))
+    __mapper_args__ = {
+        "polymorphic_identity": NoteType.USER,
+    }
 
-
-# class SQLAResearchContext(Base):
-#     __tablename__ = 'research_contexts'
-
-#     id = Column(String, primary_key=True, default=uuid.uuid4().hex)
-#     title = Column(String)
-#     vector_store = relationship('SQLAVectorStore', backref='research_context', uselist=False)
-#     research_id = Column(String, ForeignKey('research_topics.id'), nullable=False)
-#     source_documents = relationship('SQLADocument', backref='research_context')
-#     conversations = relationship('SQLAConversation', backref='research_context')
-#     notes = relationship('SQLANote', backref='research_context')
-
-# class SQLAVectorStore(Base):
-#     __tablename__ = 'vector_stores'
-
-#     vector_store_id = Column(String, primary_key=True, default=uuid.uuid4().hex)
-#     name = Column(String)
-#     lfn = Column(String, unique=True)  # Logical File Name
-#     protocol = Column(SAEnum(ProtocolEnum), nullable=False)
-#     research_context_id = Column(String, ForeignKey('research_contexts.id'))
+    def __repr__(self):
+        return f"<UserNote (id={self.id}, user={self.user_id})>"
 
 
-# class MessageDocumentAssociation(Base):
-#     __tablename__ = 'message_document_association'
-#     message_id = Column(String, ForeignKey('messages.message_id'), primary_key=True)
-#     document_id = Column(String, ForeignKey('documents.document_id'), primary_key=True)
+class SQLAConversationNote(SQLANote):
+    __tablename__ = "conversation_note"
+    id: Mapped[int] = mapped_column(Integer, ForeignKey("note.id"), primary_key=True)
+    conversation_id: Mapped[int] = mapped_column(
+        ForeignKey("conversation.id"), nullable=False
+    )
 
-# class ResearchContextDocumentAssociation(Base):
-#     __tablename__ = 'research_context_document_association'
-#     research_context_id = Column(String, ForeignKey('research_contexts.id'), primary_key=True)
-#     document_id = Column(String, ForeignKey('documents.document_id'), primary_key=True)
+    __mapper_args__ = {
+        "polymorphic_identity": NoteType.CONVERSATION,
+    }
 
-# class ResearchTopicDocumentAssociation(Base):
-#     __tablename__ = 'research_goal_document_association'
-#     research_goal_id = Column(String, ForeignKey('research_topics.id'), primary_key=True)
-#     document_id = Column(String, ForeignKey('documents.document_id'), primary_key=True)
+    def __repr__(self):
+        return f"<ConversationNote (id={self.id}, conversation={self.conversation_id})>"
+    
+class SQLADocumentNote(SQLANote):
+    __tablename__ = "document_note"
+    id: Mapped[int] = mapped_column(Integer, ForeignKey("note.id"), primary_key=True)
+    document_id: Mapped[int] = mapped_column(
+        ForeignKey("knowledge_base.id"), nullable=False
+    )
+
+    __mapper_args__ = {
+        "polymorphic_identity": NoteType.DOCUMENT,
+    }
+
+    def __repr__(self):
+        return f"<DocumentNote (id={self.id}, document={self.document_id})>"
+
+
+class SQLAResearchTopicNotes(SQLANote):
+    __tablename__ = "research_topic_note"
+    id: Mapped[int] = mapped_column(Integer, ForeignKey("note.id"), primary_key=True)
+    research_topic_id: Mapped[int] = mapped_column(
+        ForeignKey("research_topic.id"), nullable=False
+    )
+
+    __mapper_args__ = {
+        "polymorphic_identity": NoteType.RESEARCH_TOPIC,
+    }
+
+    def __repr__(self):
+        return f"<ResearchTopicNote (id={self.id}, research_topic={self.research_topic_id})>"
