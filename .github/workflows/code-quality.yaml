@@ -29,12 +29,12 @@ jobs:
         sudo apt-get update
         sudo apt-get install python3-dev libpq-dev # psycopg2
         python -m pip install --upgrade pip
-        pip install poetry
-        poetry install
+        poetry env use 3.9
+        poetry install --no-root
 
     - name: Run mypy
-      run: mypy .
+      run: poetry run mypy .
 
     - name: Run Black
       if: always()
-      run: black --check .
+      run: poetry run black --check .
