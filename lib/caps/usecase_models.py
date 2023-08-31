@@ -1,45 +1,42 @@
-from typing import TypeVar, Literal, Generic
-
+from typing import Optional, TypeVar, Literal, Generic, TypedDict
 
 TRequestModel = TypeVar("TRequestModel")
-rageAuthToken = TypeVar("rageAuthToken", str)
 
-
-class TAuthenticatedRequestModel(TRequestModel, rageAuthToken):
-    """A type that represents an authenticated request model.
-    @typeparam TRequestModel The type of the request model which must include rageAuthToken key.
-    @remarks
-    The rageAuthToken is made available by the session
+class AuthenticatedRequestModel(Generic[TRequestModel]):
     """
+    A generic model for authenticated requests.
 
-    pass
-
-
-class BaseResponseModel:
+    @ivar authToken: The authentication token for the request.
+    @type authToken: str
     """
-    A base type for response models.
-    @property status A string that indicates the status of the response model. Must be 'success'.
+    authToken: str
+
+class BaseResponseModel(TypedDict):
     """
+    A base model for successful responses.
 
-    def __init__(self, status: Literal["success"]):
-        self.status = status
-
-
-TResponseModel = TypeVar("TResponseModel", bound=BaseResponseModel)
-
-
-class BaseErrorResponseModel(Exception):
+    @ivar status: The status of the response.
+    @type status: Literal["success"]
     """
-    A base type for error response models.
-    @property status A string that indicates the status of the error response model. Must be 'error' or 'critical', the latter indicating that the further requests in a pipeline must be canceled.
-    @property message A string that provides additional information about the error.
-    @property code A number that indicates the error code. This is usually passed to the Presenter to render an HTTP error.
+    status: Literal["success"]
+
+class BaseErrorResponseModel(TypedDict):
     """
+    A base model for error responses.
 
-    def __init__(self, status: Literal["error"] | Literal["critical"], errorMessage: str, errorCode: int):
-        self.status = status
-        self.errorMessage = errorMessage
-        self.errorCode = errorCode
-
-
-TErrorModel = TypeVar("TErrorModel", bound=BaseErrorResponseModel)
+    @ivar status: The status of the response.
+    @type status: Literal["error"]
+    @ivar errorCode: The error code of the response.
+    @type errorCode: Optional[int]
+    @ivar errorMessage: The error message of the response.
+    @type errorMessage: Optional[str]
+    @ivar errorName: The name of the error.
+    @type errorName: Optional[str]
+    @ivar errorType: The type of the error.
+    @type errorType: Optional[Literal["gateway_endpoint_error"] | str]
+    """
+    status: Literal["error"]
+    errorCode: Optional[int]
+    errorMessage: Optional[str]
+    errorName: Optional[str]
+    errorType: Optional[Literal["gateway_endpoint_error"] | str]
